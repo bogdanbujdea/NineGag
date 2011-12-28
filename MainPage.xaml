@@ -11,7 +11,7 @@
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    shell:SystemTray.IsVisible="True">
+    shell:SystemTray.IsVisible="True" xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit">
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
@@ -22,12 +22,18 @@
 
         <!--TitlePanel contains the name of the application and page title-->
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock x:Name="ApplicationTitle" Text="MY APPLICATION" Style="{StaticResource PhoneTextNormalStyle}"/>
-            <TextBlock x:Name="PageTitle" Text="page name" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+            <TextBlock x:Name="ApplicationTitle" Text="9Gag" Style="{StaticResource PhoneTextNormalStyle}"/>
+            <TextBlock x:Name="PageTitle" Text="Fun Type" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0"></Grid>
+        <toolkit:WrapPanel Height="607" HorizontalAlignment="Left" Margin="12,0,0,0" Name="wrapPanel" VerticalAlignment="Top" Width="456" Grid.Row="1">
+            <Button Name="btnHotPage" Content="Hot Page" Width="228" Height="300"></Button>
+            <Button Name="btnTrendingPage" Content="Trending Page" Height="300" Width="228"></Button>
+            <Button Name="btnVotePage" Content="Vote Page" Height="300" Width="228"></Button>
+            <Button Name="btnYouTubePage" Content="YouTube Page" Height="300" Width="228"></Button>
+        </toolkit:WrapPanel>
     </Grid>
  
     <!--Sample code showing usage of ApplicationBar-->
