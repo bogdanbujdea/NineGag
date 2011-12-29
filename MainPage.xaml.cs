@@ -41,6 +41,21 @@ namespace NineGag
                 MessageBox.Show("WrongPage");
             }
             MessageBox.Show("Selected Page is " + type);
+            try
+            {
+                if (NavigationService.Navigate(new Uri("/GagsPage.xaml?Type=" + type, UriKind.RelativeOrAbsolute)) != true)
+                    MessageBox.Show("Can't change page");
+            }
+            catch (ArgumentException argumentException)
+            {
+                MessageBox.Show(argumentException.Message);
+            }
+            
+            catch (UriFormatException uriFormat)
+            {
+                MessageBox.Show(uriFormat.Message);
+            }
+            
         }
        
 
