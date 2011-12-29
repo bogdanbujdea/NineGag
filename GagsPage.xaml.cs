@@ -18,6 +18,7 @@ namespace NineGag
         public GagsPage()
         {
             InitializeComponent();
+            
         }
     }
 }
