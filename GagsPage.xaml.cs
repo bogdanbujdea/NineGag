@@ -45,7 +45,9 @@ namespace NineGag
                         Page.Type = GagType.Youtube;
                     Page.PreviousPage = "FirstPage";
                     Page.CurrentImageId = 0;
-                    MessageBox.Show(Page.GetFirstPage(GagType.Hot));
+                    Page.GetFirstPage(GagType.Hot);
+                    MessageBox.Show("First id is: " + Page.FirstPageId);
+                    //MessageBox.Show(Page.GetFirstPage(GagType.Hot));
                 }
                 else
                 {
