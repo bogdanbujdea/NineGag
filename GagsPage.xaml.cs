@@ -21,8 +21,11 @@ namespace NineGag
         {
             InitializeComponent();
             Page = new NineGagPage();
+            MessageBox.Show("Loading");
             Index = 0;
         }
+
+
 
         private void GagsPageLoaded(object sender, RoutedEventArgs e)
         {
@@ -30,7 +33,6 @@ namespace NineGag
             {
                 if (NavigationContext.QueryString.ContainsKey("Type"))
                 {
-                   
                     string type = NavigationContext.QueryString["Type"];
                    // MessageBox.Show("Page type is " + type + "link=" + Page.Link);
                     if(Page == null)
@@ -45,8 +47,8 @@ namespace NineGag
                         Page.Type = GagType.Youtube;
                     Page.PreviousPage = "FirstPage";
                     Page.CurrentImageId = 0;
-                    Page.GetFirstPage(GagType.Hot);
-                    MessageBox.Show("First id is: " + Page.FirstPageId);
+                    //Page.GetFirstPage(GagType.Hot);
+                    //MessageBox.Show("First id is: " + Page.FirstPageId);
                     //MessageBox.Show(Page.GetFirstPage(GagType.Hot));
                 }
                 else
