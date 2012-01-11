@@ -1,4 +1,5 @@
 ﻿using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace NineGag
 {
@@ -9,10 +10,17 @@ namespace NineGag
         public string TextDescription { get; set; }
         public string URL { get; set; }
         public string User { get; set; }
+        public string ImageLink { get; set; }
+        private BitmapImage _image;
+        public BitmapImage Image
+        {
+            get { return _image; }
+            set { _image = value; }
+        }
 
         public GagType Type { get; set; }
 
-
+        
         public GagItem()
         {
             
