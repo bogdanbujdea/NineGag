@@ -37,12 +37,13 @@ namespace NineGag
         {
             Link = "http://www.9gag.com";
             document = new HtmlDocument();
-            WebClient client = new WebClient();
+            var client = new WebClient();
             HtmlWeb.LoadAsync(Link, (sender, doc) =>
                                         {
                                             document = doc.Document;
                                             IsLoaded = true;
                                             LoadGags();
+                                            MessageBox.Show("finished");
                                         })
             ;
         
@@ -52,9 +53,19 @@ namespace NineGag
 
         private void LoadGags()
         {
-            var Nodes = document.DocumentNode.DescendantNodesAndSelf()
+            IEnumerable<HtmlNode> Nodes = null;
+            try
+            {
+                Nodes = document.DocumentNode.DescendantNodesAndSelf()
                     .Where(n => n.Name == "li")
                     .Where(n => n.GetAttributeValue("class", null) == " entry-item");
+                
+            }
+            catch (NullReferenceException)
+            {
+                MessageBox.Show("Null");
+                return;
+            }
             GagItem gagItem = null;
             foreach (var node in Nodes)
             {
@@ -66,18 +77,21 @@ namespace NineGag
 
                 var type = node.Descendants("div").Select(
                     x => x.GetAttributeValue("class", "invalid")).ToArray();
-                if (type.Any() && type[0] != "invalid")
-                    switch (type[0])
+                int i = 0;
+                if(type.Any())
+                    while (true)
                     {
-                        case "img-wrap":
-                            gagItem.Type = this.Type;
+                        if (type[i] == "img-wrap")
+                        {
+                            gagItem.Type = Type;
                             break;
-                        case "video-post":
+                        }
+                        if (type[i] == "video-post")
+                        {
                             gagItem.Type = GagType.Youtube;
                             break;
-                        default:
-                            MessageBox.Show("Error occured while loading image/video");
-                            break;
+                        }
+                        i++;
                     }
                 if (gagItem.Type != GagType.Youtube)
                 {
@@ -94,7 +108,7 @@ namespace NineGag
                     if (videoLink.Any() && videoLink[0] != "invalid")
                         gagItem.ImageLink = videoLink[0];
                     string url = "http://img.youtube.com/vi/VIDEOID/0.jpg";
-                    int i = 0;
+                    i = 0;
                     string tmp = gagItem.ImageLink;
                     tmp = tmp.Replace("/v/", "/watch?v=");
                     while (tmp[i] != '=') i++;
@@ -106,10 +120,10 @@ namespace NineGag
                     gagItem.Image = new BitmapImage(new Uri(url, UriKind.RelativeOrAbsolute));
                 }
                 gagItem.User = "User";
-                this._gags.Add(gagItem);
+                _gags.Add(gagItem);
             }
-            this.GagCount = _gags.Count;
-            this.IsLoaded = true;
+            GagCount = _gags.Count;
+            IsLoaded = true;
             
 
 
@@ -172,7 +186,7 @@ namespace NineGag
 
         public void AddGag()
         {
-            GagItem gagItem = new GagItem();
+            var gagItem = new GagItem();
             string tmp = null;
             tmp = GetImageLink();
             if (tmp == "Null Error" || tmp == null)

@@ -21,11 +21,14 @@ namespace NineGag
         {
             InitializeComponent();
             Page = new NineGagPage();
-            MessageBox.Show("Loading");
             Index = 0;
         }
 
-
+        public void LoadGag()
+        {
+            Index = Page.CurrentImageId;
+            GagImage.Source = Page.GagItem.Image;
+        }
 
         private void GagsPageLoaded(object sender, RoutedEventArgs e)
         {
