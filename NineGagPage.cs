@@ -38,13 +38,12 @@ namespace NineGag
             Link = "http://www.9gag.com";
             document = new HtmlDocument();
             var client = new WebClient();
+            _gags = new List<GagItem>();
             HtmlWeb.LoadAsync(Link, (sender, doc) =>
                                         {
                                             document = doc.Document;
                                             IsLoaded = true;
-                                            LoadGags();
-                                            MessageBox.Show("finished");
-                                        })
+                                           })
             ;
         
             
@@ -122,9 +121,23 @@ namespace NineGag
                 gagItem.User = "User";
                 _gags.Add(gagItem);
             }
-            GagCount = _gags.Count;
-            IsLoaded = true;
-            
+            if (_gags != null && _gags.Count > 0)
+            {
+                GagCount = _gags.Count;
+                IsLoaded = true;
+            }
+            else
+            {
+                var result = MessageBox.Show("Error occured while loading gags. Try again?", "ERROR", MessageBoxButton.OKCancel);
+                if(result == MessageBoxResult.OK)
+                    LoadGags();
+                else
+                {
+                    IsLoaded = false;
+                    throw new ArgumentNullException();
+                }
+            }
+
 
 
         }
@@ -231,7 +244,7 @@ namespace NineGag
 
         public void Load()
         {
-
+            LoadGags();
         }
 
         public bool SaveState()

@@ -25,9 +25,10 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
+            <Button Content="Start" Height="159" Name="StartBtn" Width="294" Click="StartBtnClick" IsEnabled="True" />
             <StackPanel>
                 <Border>
-                    <Image Name="GagImage" Height="695"></Image>
+                    <Image Name="GagImage" Height="695" ></Image>
                 </Border>
                 
             </StackPanel>

@@ -21,6 +21,7 @@ namespace NineGag
         {
             InitializeComponent();
             Page = new NineGagPage();
+            
             Index = 0;
         }
 
@@ -64,6 +65,22 @@ namespace NineGag
                 NavigationService.GoBack();
             }
             
+        }
+
+        private void StartBtnClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Page.Load();
+                StartBtn.Visibility = Visibility.Collapsed;
+                GagImage.Source = Page.GagItem.Image;
+            }
+            catch (ArgumentException)
+            {
+                StartBtn.ClickMode = ClickMode.Release;
+                
+                NavigationService.GoBack();
+            }
         }
     }
 }
