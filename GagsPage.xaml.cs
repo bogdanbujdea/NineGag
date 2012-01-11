@@ -1,27 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 
 namespace NineGag
 {
     public partial class GagsPage : PhoneApplicationPage
     {
-        private NineGagPage Page;
+        private readonly NineGagPage Page;
         private int Index;
+
         public GagsPage()
         {
             InitializeComponent();
             Page = new NineGagPage();
-            
+
             Index = 0;
         }
 
@@ -38,8 +31,8 @@ namespace NineGag
                 if (NavigationContext.QueryString.ContainsKey("Type"))
                 {
                     string type = NavigationContext.QueryString["Type"];
-                   // MessageBox.Show("Page type is " + type + "link=" + Page.Link);
-                    if(Page == null)
+                    // MessageBox.Show("Page type is " + type + "link=" + Page.Link);
+                    if (Page == null)
                         NavigationService.GoBack();
                     if (type == "HotPage")
                         Page.Type = GagType.Hot;
@@ -64,7 +57,6 @@ namespace NineGag
             {
                 NavigationService.GoBack();
             }
-            
         }
 
         private void StartBtnClick(object sender, RoutedEventArgs e)
@@ -78,7 +70,7 @@ namespace NineGag
             catch (ArgumentException)
             {
                 StartBtn.ClickMode = ClickMode.Release;
-                
+
                 NavigationService.GoBack();
             }
         }
