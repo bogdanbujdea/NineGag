@@ -1,5 +1,6 @@
 ﻿using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using HtmlAgilityPack;
 
 namespace NineGag
 {
@@ -12,6 +13,7 @@ namespace NineGag
         public string User { get; set; }
         public string ImageLink { get; set; }
         private BitmapImage _image;
+        public HtmlDocument Document { get; set; }
         public BitmapImage Image
         {
             get { return _image; }
