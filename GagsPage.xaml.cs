@@ -10,8 +10,8 @@ namespace NineGag
     {
         public enum BackgroundWork
         {
-            LoadPreviousGag,
-            LoadNextGag,
+            LoadPreviousPage,
+            LoadNextPage,
             LoadPage
         };
 
@@ -27,7 +27,8 @@ namespace NineGag
 
             try
             {
-                Page.Load();
+                _work = BackgroundWork.LoadPage;
+                Page.GetFirstPage(GagType.Hot);
             }
             catch (Exception exception)
             {
@@ -40,8 +41,10 @@ namespace NineGag
             backgroundWorker = new BackgroundWorker();
             backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorkerDoWork);
             backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(BackgroundWorkerRunWorkerCompleted);
+            
             _work = BackgroundWork.LoadPage;
             backgroundWorker.RunWorkerAsync();
+            
             Index = 0;
             var gestureListener = GestureService.GetGestureListener(LayoutRoot);
             gestureListener.Flick += new EventHandler<FlickGestureEventArgs>(GestureListenerFlick);
@@ -57,16 +60,13 @@ namespace NineGag
         {
             try
             {
-                string id = null;
-                if (_work == BackgroundWork.LoadPage)
-                {
-                    Page.LoadGags();
-                    id = Page.GagItem.Id;
-                    GagImage.Source = Page.GagItem.Image;
-                    //for (int i = 0; i < 10; i++)
-                    //    Page.LoadPreviousGag();
-                }
-                
+                Page.Reset();
+                Page.LoadGags();
+                if (_work == BackgroundWork.LoadNextPage || _work == BackgroundWork.LoadPage)
+                    Page.CurrentImageId = 0;
+                else Page.CurrentImageId = Page.GagCount - 1;
+
+                GagImage.Source = Page.GagItem.Image;
             }
             catch (Exception exception)
             {
@@ -82,9 +82,9 @@ namespace NineGag
         {
             var worker = sender as BackgroundWorker;
 
-            string text = "Loading";
-            string dot = ".";
-            int count = 0;
+            var text = "Loading";
+            const string dot = ".";
+            var count = 0;
             while (Page.IsLoaded == false)
             {
                 Deployment.Current.Dispatcher.BeginInvoke(()=> textBlock1.Text = text);
@@ -140,12 +140,27 @@ namespace NineGag
                     Page.CurrentImageId--;
                     if (Page.CurrentImageId == -1)
                     {
-                        Page.CurrentImageId = 0;
-                        MessageBox.Show("There are no newer gags");
-                        return;
+                        var link = Page.Id;
+                        int i;
+                        if(Int32.TryParse(link, out i) == true)
+                        {
+                            string tmp = "/hot/" + i;
+                            if(tmp == Page.FirstPageId)
+                            {
+                                Page.CurrentImageId = 0;
+                                MessageBox.Show("There are no newer gags");
+                                return;
+                            }
+                            i++;
+                            Page.Id = i.ToString();
+                            Page.Link = "http://9gag.com/hot/" + Page.Id;
+                            _work = BackgroundWork.LoadPreviousPage;
+                            Page.Load();
+                            backgroundWorker.RunWorkerAsync();
+                        }
+                        
                     }
-                    _work = BackgroundWork.LoadPreviousGag;
-                    Page.LoadPreviousGag();
+                    
                    if(Page.CurrentImageId >= 0)
                         GagImage.Source = Page.GagItem.Image;
                     
@@ -162,13 +177,28 @@ namespace NineGag
                 try
                 {
                     Page.CurrentImageId++;
-                    GagImage.Source = Page.GagItem.Image; //Next image
-                    Page.LoadNextGag();
+                    if(Page.CurrentImageId < Page.GagCount)
+                        GagImage.Source = Page.GagItem.Image; //Next image
+                    else
+                    {
+                        var link = Page.Id;
+                        int i;
+                        if(Int32.TryParse(link, out i) == true)
+                        {
+                            i--;
+                            Page.Id = i.ToString();
+                            Page.Link = "http://9gag.com/hot/" + Page.Id;
+                            _work = BackgroundWork.LoadNextPage;
+                            Page.Load();
+                            backgroundWorker.RunWorkerAsync();
+                        }
+
+                    }
                     Index++;
                 }
                 catch (Exception exception)
                 {
-                    Page.LoadNextGag();
+                    
                     Page.CurrentImageId--;
                 }
             }

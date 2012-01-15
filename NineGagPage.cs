@@ -239,204 +239,22 @@ namespace NineGag
             }
         }
 
-        public void LoadPreviousGag()
+      
+        public void Reset()
         {
+            _gags.Clear();
+            GagCount = 0;
+            CurrentImageId = 0;
             
-            var index = 0;
-            var firstLink = _gags[0].URL;
-            if (_gags.Count() > 25)
-            {
-                _gags.RemoveAt(_gags.Count - 1);    
-            }
-            GagLoaded = false;
-            HtmlWeb.LoadAsync(firstLink, (sender, completed) =>
-                                            {
-                                                _document = completed.Document;
-                                                var prevLink = GetPreviousLink(completed.Document);
-                                                HtmlWeb.LoadAsync(prevLink, (o, loadCompleted) =>
-                                                                                {
-                                                                                    try
-                                                                                    {
-                                                                                        if (_document.Equals(loadCompleted.Document))
-                                                                                            MessageBox.Show(
-                                                                                                "it's the same doc");
-                                                                                        var gagItem = new GagItem();
-                                                                                        gagItem.URL = prevLink;
-                                                                                        gagItem.Id = GetIdFromLink(prevLink);
-                                                                                        gagItem.ImageLink = GetImageLink(loadCompleted.Document);
-                                                                                        gagItem.TextDescription =
-                                                                                            GetText(loadCompleted.Document);
-                                                                                        gagItem.Type = GetGagType(loadCompleted.Document);
-                                                                                        gagItem.User = "User";
-                                                                                        gagItem.Image = new BitmapImage(new Uri(gagItem.ImageLink, UriKind.RelativeOrAbsolute));
-                                                                                        _gags.Insert(0, gagItem);
-                                                                                        _document = loadCompleted.Document;
-                                                                                        GagLoaded = true;
-                                                                                    }
-                                                                                    catch (Exception exception)
-                                                                                    {
-                                                                                        if (exception is ArgumentNullException)
-                                                                                            MessageBox.Show(
-                                                                                                "Couldn't load the next image/video");
-                                                                                        GagLoaded = true;
-
-                                                                                    }
-                                                                                });
-                                            });
-            
+            IsLoaded = false;
         }
-
-        public void LoadNextGag()
-        {
-            //FinishedDownload = false;
-            if(_gags.Count > 25)
-                _gags.RemoveAt(0);
-            var index = _gags.Count + 1;
-            var lastLink = _gags.Last().URL;
-            HtmlWeb.LoadAsync(lastLink, (sender, completed) =>
-                                            {
-                                                _document = completed.Document;
-                                                var nextLink = GetNextLink(completed.Document);
-                                                HtmlWeb.LoadAsync(nextLink, (o, loadCompleted) =>
-                                                                                {
-                                                                                    try
-                                                                                    {
-                                                                                        var gagItem = new GagItem();
-                                                                                        gagItem.URL = nextLink;
-                                                                                        gagItem.Id = GetIdFromLink(nextLink);
-                                                                                        gagItem.ImageLink = GetImageLink(loadCompleted.Document);
-                                                                                        gagItem.TextDescription = GetText(loadCompleted.Document);
-                                                                                        gagItem.Type = GetGagType(loadCompleted.Document);
-                                                                                        gagItem.User = "User";
-                                                                                        gagItem.Image = new BitmapImage(new Uri(gagItem.ImageLink, UriKind.RelativeOrAbsolute));
-                                                                                        _gags.Add(gagItem);
-                                                                                        GagLoaded = true;
-                                                                                    }
-                                                                                    catch (Exception exception)
-                                                                                    {
-                                                                                        //if (exception is ArgumentNullException)
-                                                                                        //    MessageBox.Show(
-                                                                                        //        "Couldn't load the next image/video");
-                                                                                        //GagLoaded = true;
-
-                                                                                    }
-                                                                                });
-                                            });
-            
-        }
-
-        public GagType GetGagType(HtmlDocument document)
-        {
-            var gagType = document.DocumentNode.DescendantNodesAndSelf()
-                    .Where(n => n.Name == "div")
-                    .Where(n => n.GetAttributeValue("id", null) == "content").ToArray(); //array of html nodes
-            var type = gagType[0].Descendants("div").Select(
-                        x => x.GetAttributeValue("class", "invalid")).ToArray(); //determine the type of GagItem
-            int i = 0;
-            if (type.Any() && type[i] != "invalid")
-                while (i < type.Count())
-                {
-                    if (type[i] == "img-wrap")
-                    {
-                        return GagType.Hot;
-                    }
-                    if (type[i] == "video-post")
-                    {
-                        return GagType.Youtube;
-                    }
-                    i++;
-                }
-            throw new ArgumentNullException();
-        }
-
-        public string GetText(HtmlDocument document)
-        {
-            HtmlNode[] text = document.DocumentNode.DescendantNodesAndSelf()
-                    .Where(n => n.Name == "div")
-                    .Where(n => n.GetAttributeValue("id", null) == "content").ToArray();
-            if (text.Any())
-            {
-                string[] textString = text.ElementAt(0).Descendants("img").Select(
-                            x => x.GetAttributeValue("alt", null)).ToArray();
-                if (textString.Any())
-                    return textString[0];
-            }
-            throw new ArgumentNullException();
-        }
-
-        public string GetImageLink(HtmlDocument document)
-        {
-            HtmlNode[] imageLink = document.DocumentNode.DescendantNodesAndSelf()
-                    .Where(n => n.Name == "div")
-                    .Where(n => n.GetAttributeValue("id", null) == "content").ToArray();
-            if (imageLink.Any())
-            {
-                string[] link = imageLink.ElementAt(0).Descendants("img").Select(
-                            x => x.GetAttributeValue("src", null)).ToArray();
-                if (link.Any())
-                    return link[0];
-            }
-            throw new ArgumentNullException();
-        }
-
-        public string GetPreviousLink(HtmlDocument document)
-        {
-            try
-            {
-                HtmlNode[] nextLink = document.DocumentNode.DescendantNodesAndSelf()
-                .Where(n => n.Name == "a")
-                .Where(n => n.GetAttributeValue("id", null) == "prev_post").ToArray();
-                if (nextLink.Any())
-                    return nextLink.ElementAt(0).Attributes["href"].Value;
-            }
-            catch (Exception exception)
-            {
-                throw new ArgumentNullException();
-            }
-
-            throw new ArgumentNullException();
-        }
-
-        public string GetNextLink(HtmlDocument document)
-        {
-            try
-            {
-                HtmlNode[] nextLink = document.DocumentNode.DescendantNodesAndSelf()
-                    .Where(n => n.Name == "a")
-                    .Where(n => n.GetAttributeValue("id", null) == "next_post").ToArray();
-                if (nextLink.Any())
-                    return nextLink.ElementAt(0).Attributes["href"].Value;
-            }
-            catch (Exception exception)
-            {
-                throw new ArgumentNullException();
-            }
-            throw new ArgumentNullException();
-        }
-
-        //public void AddGag()
-        //{
-        //    //var gagItem = new GagItem();
-        //    ////string tmp = GetImageLink();
-        //    //if (tmp == "Null Error" || tmp == null)
-        //    //    MessageBox.Show("Try again please");
-        //    //else
-        //    //    gagItem.URL = tmp;
-        //    //GetIdFromLink(Link);
-        //    //gagItem.Type = Type;
-        //}
-
-        public void LoadPage(string link)
-        {
-            HtmlWeb.LoadAsync(link, (sender, completed) => { _document = completed.Document; });
-        }
-
-
+   
         public void Load()
         {
             HtmlWeb.LoadAsync(Link, (sender, doc) =>
                                         {
                                             _document = doc.Document ?? null;
+                                            
                                             IsLoaded = true;
                 //else throw new ArgumentException("Not connected");
                                         }
@@ -456,7 +274,7 @@ namespace NineGag
 
         public async void GetFirstPage(GagType type)
         {
-            bool firstPage = false;
+            var firstPage = false;
             try
             {
                 if (Type == GagType.Hot)
@@ -470,7 +288,7 @@ namespace NineGag
                         .Where(n => n.GetAttributeValue("class", null) == "next").ToArray();
                     if (firstLinks.Any())
                     {
-                        string id = firstLinks.ElementAt(0).Attributes["href"].Value;
+                        var id = firstLinks.ElementAt(0).Attributes["href"].Value;
 
                         link += id;
 
@@ -483,22 +301,27 @@ namespace NineGag
                             pageId++;
                             link = "http://9gag.com/hot/";
                             link += pageId.ToString();
-                            string doc =
+                            var doc =
                                 await new WebClient().DownloadStringTaskAsync(new Uri(link, UriKind.RelativeOrAbsolute));
                             _document.LoadHtml(doc);
                             try
                             {
-                                HtmlNode[] pageLinks = _document.DocumentNode.DescendantNodesAndSelf()
+                                var pageLinks = _document.DocumentNode.DescendantNodesAndSelf()
                                     .Where(n => n.Name == "a")
                                     .Where(n => n.GetAttributeValue("class", null) == "previous").ToArray();
-                                string prevId = "";
+                                var prevId = "";
                                 if (pageLinks.Any())
                                     prevId = pageLinks.ElementAt(0).Attributes["href"].Value;
                                 if (prevId.Length > 1)
-                                    MessageBox.Show("prev id is" + prevId);
-                                else
                                 {
                                     FirstPageId = prevId;
+                                }
+                                else
+                                {
+                                    firstPage = true;
+                                    Link = "http://9gag.com" + FirstPageId;
+                                    Id = GetIdFromLink(Link);
+                                    Load();
                                     return;
                                 }
                             }
@@ -511,10 +334,9 @@ namespace NineGag
                     }
                 }
             }
-            catch (Exception exception)
+            catch
             {
-                MessageBox.Show(exception.Message);
-                throw;
+                
             }
         }
 
