@@ -1,9 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Media;
 using Microsoft.Phone.Controls;
-
+using System.Net.NetworkInformation;
 namespace NineGag
 {
     public partial class GagsPage : PhoneApplicationPage
@@ -15,11 +16,9 @@ namespace NineGag
             LoadPage
         };
 
+        private NineGagPage Page;
+        private readonly BackgroundWorker _backgroundWorker;
         private BackgroundWork _work;
-        private readonly NineGagPage Page;
-        private int Index;
-        private bool LoadingCompleted;
-        private BackgroundWorker backgroundWorker;
         public GagsPage()
         {
             InitializeComponent();
@@ -33,40 +32,47 @@ namespace NineGag
             catch (Exception exception)
             {
                 if (exception is ArgumentException)
+                {
                     MessageBox.Show("You are not connected to the internet. Please try again!");
-                NavigationService.GoBack();
+                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+                }
+                
             }
-            
-            LoadingCompleted = false;
-            backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorkerDoWork);
-            backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(BackgroundWorkerRunWorkerCompleted);
-            
+
+            _backgroundWorker = new BackgroundWorker();
+            _backgroundWorker.DoWork += BackgroundWorkerDoWork;
+            _backgroundWorker.RunWorkerCompleted += BackgroundWorkerRunWorkerCompleted;
+
             _work = BackgroundWork.LoadPage;
-            backgroundWorker.RunWorkerAsync();
-            
-            Index = 0;
-            var gestureListener = GestureService.GetGestureListener(LayoutRoot);
-            gestureListener.Flick += new EventHandler<FlickGestureEventArgs>(GestureListenerFlick);
-            gestureListener.Tap += new EventHandler<GestureEventArgs>(gestureListener_Tap);
-            gestureListener.Hold += new EventHandler<GestureEventArgs>(gestureListener_Hold);
-            gestureListener.DragStarted += new EventHandler<DragStartedGestureEventArgs>(gestureListener_DragStarted);
-            gestureListener.DragDelta += new EventHandler<DragDeltaGestureEventArgs>(gestureListener_DragDelta);
-            gestureListener.DragCompleted += new EventHandler<DragCompletedGestureEventArgs>(gestureListener_DragCompleted);
+            _backgroundWorker.RunWorkerAsync();
+
+            GestureListener gestureListener = GestureService.GetGestureListener(LayoutRoot);
+            gestureListener.Flick += GestureListenerFlick;
+            gestureListener.Tap += gestureListener_Tap;
+            gestureListener.Hold += gestureListener_Hold;
+            gestureListener.DragStarted += gestureListener_DragStarted;
+            gestureListener.DragDelta += gestureListener_DragDelta;
+            gestureListener.DragCompleted += gestureListener_DragCompleted;
         }
 
-       
-        void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private bool Connected()
+        {
+            return NetworkInterface.GetIsNetworkAvailable();
+        }
+
+        private void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             try
             {
+                textBlock1.Visibility = Visibility.Collapsed;
                 Page.Reset();
                 Page.LoadGags();
                 if (_work == BackgroundWork.LoadNextPage || _work == BackgroundWork.LoadPage)
-                    Page.CurrentImageId = 0;
-                else Page.CurrentImageId = Page.GagCount - 1;
-
+                    Page.CurrentImageId = 0; //if we loaded the next page, then we load the first gag
+                else Page.CurrentImageId = Page.GagCount - 1; //else, we load the last gag
+                GagImage.Stretch = Stretch.None;
                 GagImage.Source = Page.GagItem.Image;
+                
             }
             catch (Exception exception)
             {
@@ -76,21 +82,29 @@ namespace NineGag
                     MessageBox.Show(exception.Message);
             }
         }
-
-
-        void BackgroundWorkerDoWork(object sender, DoWorkEventArgs e)
+        
+        private void BackgroundWorkerDoWork(object sender, DoWorkEventArgs e)
         {
-            var worker = sender as BackgroundWorker;
+            if (!Connected())
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(() =>
+
+                                                          MessageBox.Show(
+                                                              "You are not connected to the internet. Please connect to\r\n to internet and try again"));
+                Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute)));
+            }
+
 
             var text = "Loading";
             const string dot = ".";
-            var count = 0;
+            int count = 0;
             while (Page.IsLoaded == false)
             {
-                Deployment.Current.Dispatcher.BeginInvoke(()=> textBlock1.Text = text);
-                
-                System.Threading.Thread.Sleep(500);
-                if(count<3)
+                Deployment.Current.Dispatcher.BeginInvoke(() => textBlock1.Text = text);
+
+                Thread.Sleep(300);
+                if (count < 3)
                 {
                     count++;
                     text += dot;
@@ -100,37 +114,34 @@ namespace NineGag
                     count = 0;
                     text = "Loading";
                 }
+                if (!Connected())
+                    break;
 
             }
-            
         }
 
-        void gestureListener_DragCompleted(object sender, DragCompletedGestureEventArgs e)
+        #region Image Gestures
+        private void gestureListener_DragCompleted(object sender, DragCompletedGestureEventArgs e)
         {
-            
         }
 
-        void gestureListener_DragDelta(object sender, DragDeltaGestureEventArgs e)
+        private void gestureListener_DragDelta(object sender, DragDeltaGestureEventArgs e)
         {
-            
         }
 
-        void gestureListener_DragStarted(object sender, DragStartedGestureEventArgs e)
+        private void gestureListener_DragStarted(object sender, DragStartedGestureEventArgs e)
         {
-            
         }
 
-        void gestureListener_Hold(object sender, GestureEventArgs e)
+        private void gestureListener_Hold(object sender, GestureEventArgs e)
         {
-           
         }
 
-        void gestureListener_Tap(object sender, GestureEventArgs e)
+        private void gestureListener_Tap(object sender, GestureEventArgs e)
         {
-            
         }
 
-        void GestureListenerFlick(object sender, FlickGestureEventArgs e)
+        private void GestureListenerFlick(object sender, FlickGestureEventArgs e)
         {
             if (e.Direction != System.Windows.Controls.Orientation.Horizontal) return;
             if (e.Angle > 270 || e.Angle < 90) //Previous Image
@@ -140,12 +151,14 @@ namespace NineGag
                     Page.CurrentImageId--;
                     if (Page.CurrentImageId == -1)
                     {
-                        var link = Page.Id;
+                        if(!Connected())
+                            throw new ArgumentException();
+                        string link = Page.Id;
                         int i;
-                        if(Int32.TryParse(link, out i) == true)
+                        if (Int32.TryParse(link, out i))
                         {
                             string tmp = "/hot/" + i;
-                            if(tmp == Page.FirstPageId)
+                            if (tmp == Page.FirstPageId)
                             {
                                 Page.CurrentImageId = 0;
                                 MessageBox.Show("There are no newer gags");
@@ -155,60 +168,75 @@ namespace NineGag
                             Page.Id = i.ToString();
                             Page.Link = "http://9gag.com/hot/" + Page.Id;
                             _work = BackgroundWork.LoadPreviousPage;
+                            Page.IsLoaded = false;
+                            textBlock1.Visibility = Visibility.Visible;
+                            GagImage.Source = null;
                             Page.Load();
-                            backgroundWorker.RunWorkerAsync();
+                            _backgroundWorker.RunWorkerAsync();
                         }
-                        
                     }
-                    
-                   if(Page.CurrentImageId >= 0)
+                    else if (Page.CurrentImageId >= 0)
+                    {
+                        GagImage.Stretch = Stretch.None;
                         GagImage.Source = Page.GagItem.Image;
-                    
+                    }
                 }
                 catch (Exception exception)
                 {
                     if (exception is IndexOutOfRangeException)
                         MessageBox.Show("There are no previous images");
+                    else if (exception is ArgumentException)
+                    {
+                        MessageBox.Show("You are not connected to the internet!");
+
+                        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+                    }
                     Page.CurrentImageId = 1;
                 }
             }
-            else
+            else //Next image
             {
                 try
                 {
                     Page.CurrentImageId++;
-                    if(Page.CurrentImageId < Page.GagCount)
-                        GagImage.Source = Page.GagItem.Image; //Next image
+                    if (Page.CurrentImageId < Page.GagCount)
+                    {
+                        GagImage.Stretch = Stretch.None;
+                        GagImage.Source = Page.GagItem.Image;
+                    }
                     else
                     {
-                        var link = Page.Id;
+                        if (!Connected())
+                            throw new ArgumentException();
+                        string link = Page.Id;
                         int i;
-                        if(Int32.TryParse(link, out i) == true)
+                        if (Int32.TryParse(link, out i))
                         {
                             i--;
                             Page.Id = i.ToString();
                             Page.Link = "http://9gag.com/hot/" + Page.Id;
                             _work = BackgroundWork.LoadNextPage;
+                            Page.IsLoaded = false;
+                            textBlock1.Visibility = Visibility.Visible;
+                            GagImage.Source = null;
                             Page.Load();
-                            backgroundWorker.RunWorkerAsync();
+                            _backgroundWorker.RunWorkerAsync();
                         }
-
                     }
-                    Index++;
                 }
                 catch (Exception exception)
                 {
-                    
+                    if (exception is ArgumentException)
+                    {
+                        MessageBox.Show("You are not connected to the internet!");
+
+                        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+                    }
                     Page.CurrentImageId--;
                 }
             }
         }
-
-        public void LoadGag()
-        {
-            Index = Page.CurrentImageId;
-            GagImage.Source = Page.GagItem.Image;
-        }
+        #endregion
 
         private void GagsPageLoaded(object sender, RoutedEventArgs e)
         {
@@ -219,9 +247,8 @@ namespace NineGag
                     string type = NavigationContext.QueryString["Type"];
                     // MessageBox.Show("Page type is " + type + "link=" + Page.Link);
                     if (Page == null)
-                        NavigationService.GoBack();
-                    else
-                    if (type == "HotPage")
+                        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+                    else if (type == "HotPage")
                         Page.Type = GagType.Hot;
                     else if (type == "TrendingPage")
                         Page.Type = GagType.Trending;
@@ -237,33 +264,48 @@ namespace NineGag
                 }
                 else
                 {
-                    NavigationService.GoBack();
+                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
                 }
             }
             catch (ArgumentNullException)
             {
-                NavigationService.GoBack();
+                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
             }
         }
 
+        #region Pinch Events
+
         private void OnPinchStarted(object sender, PinchStartedGestureEventArgs e)
         {
-            
         }
 
         private void OnPinchDelta(object sender, PinchGestureEventArgs e)
         {
-            
         }
 
         private void OnDragDelta(object sender, DragDeltaGestureEventArgs e)
         {
-            
         }
 
-        private void DoubleTap(object sender, GestureEventArgs e)
+        private new void DoubleTap(object sender, GestureEventArgs e)
         {
-            
+        }
+        #endregion
+
+        
+
+        private void GagImage_ImageOpened(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Page.GagItem.Height = GagImage.ActualHeight;
+                Page.GagItem.Width = GagImage.ActualWidth;
+                Page.GagItem.SetStretch();
+                GagImage.Stretch = Page.GagItem.StretchMode;
+            }
+            catch
+            {
+            }
         }
     }
 }

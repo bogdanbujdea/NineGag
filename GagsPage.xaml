@@ -30,7 +30,7 @@
             <StackPanel>
                 
                 <Border>
-                    <Image Name="GagImage" Height="695" >
+                    <Image ImageOpened="GagImage_ImageOpened" Name="GagImage" Height="695" Width="454">
                         <toolkit:GestureService.GestureListener>
                             <toolkit:GestureListener
                         PinchStarted="OnPinchStarted"

@@ -1,6 +1,5 @@
 ﻿using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using HtmlAgilityPack;
 
 namespace NineGag
 {
@@ -12,31 +11,21 @@ namespace NineGag
         public string URL { get; set; }
         public string User { get; set; }
         public string ImageLink { get; set; }
-        private BitmapImage _image;
-        public HtmlDocument Document { get; set; }
-        public BitmapImage Image
-        {
-            get { return _image; }
-            set { _image = value; }
-        }
+
+        public BitmapImage Image { get; set; }
+
 
         public GagType Type { get; set; }
 
-        
-        public GagItem()
-        {
-            
-        }
-
-        public int Height { get; set; }
-        public int Width { get; set; }
+        public double Height { get; set; }
+        public double Width { get; set; }
         public Stretch StretchMode { get; set; }
 
-        public void StretchItem()
+        public void SetStretch()
         {
-            
+            if(Height < 750 && Width < 600)
+                StretchMode = Stretch.Fill;
+            else StretchMode = Stretch.None;
         }
-
-
     }
 }
