@@ -28,7 +28,10 @@
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
             <TextBlock HorizontalAlignment="Center" FontSize="40" FontFamily="Comic Sans MS" Height="50" Name="textBlock1" Text="Loading..." />
             <StackPanel>
-                
+                <Border Background="White">
+                    <TextBlock Foreground="Black" Name="GagText" Text="Loading..." FontFamily="Comic Sans MS" FontSize="25" Height="70"></TextBlock>
+                </Border>
+                <Line Height="3" Fill="Blue"></Line>
                 <Border>
                     <Image ImageOpened="GagImage_ImageOpened" Name="GagImage" Height="695" Width="454">
                         <toolkit:GestureService.GestureListener>

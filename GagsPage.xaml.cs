@@ -302,6 +302,7 @@ namespace NineGag
                 Page.GagItem.Width = GagImage.ActualWidth;
                 Page.GagItem.SetStretch();
                 GagImage.Stretch = Page.GagItem.StretchMode;
+                GagText.Text = Page.GagItem.TextDescription;
             }
             catch
             {
