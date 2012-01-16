@@ -20,40 +20,20 @@ namespace NineGag
         {
             InitializeComponent();
             btnHotPage.Click += new RoutedEventHandler(ChangePage);
-            btnTrendingPage.Click += ChangePage;
-            btnVotePage.Click += ChangePage;
-            btnYouTubePage.Click += ChangePage;
+            
         }
 
         private void ChangePage(object sender, RoutedEventArgs e)
         {
-            string type = "WrongPage";
-            if (sender.Equals(btnHotPage))
-                type = "HotPage";
-            else if (sender.Equals(btnTrendingPage))
-                type = "TrendingPage";
-            else if (sender.Equals(btnVotePage))
-                type = "VotePage";
-            else if (sender.Equals(btnYouTubePage))
-                type = "YouTubePage";
-            else
-            {
-                MessageBox.Show("WrongPage");
-            }
-            MessageBox.Show("Selected Page is " + type);
+            
             try
             {
-                if (NavigationService.Navigate(new Uri("/GagsPage.xaml?Type=" + type, UriKind.RelativeOrAbsolute)) != true)
+                if (NavigationService.Navigate(new Uri("/GagsPage.xaml", UriKind.RelativeOrAbsolute)) != true)
                     MessageBox.Show("Can't change page");
             }
-            catch (ArgumentException argumentException)
+            catch
             {
-                MessageBox.Show(argumentException.Message);
-            }
-            
-            catch (UriFormatException uriFormat)
-            {
-                MessageBox.Show(uriFormat.Message);
+                MessageBox.Show("Can't change page");
             }
             
         }

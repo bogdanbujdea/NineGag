@@ -27,13 +27,9 @@
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0"></Grid>
-        <toolkit:WrapPanel Height="607" HorizontalAlignment="Left" Margin="12,0,0,0" Name="wrapPanel" VerticalAlignment="Top" Width="456" Grid.Row="1">
-            <Button Name="btnHotPage" Content="Hot Page" Width="228" Height="300"></Button>
-            <Button Name="btnYouTubePage" Content="YouTube Page" Height="300" Width="228"></Button>
-            <Button Name="btnVotePage" Content="Vote Page" Height="300" Width="228"></Button>
-            <Button Name="btnTrendingPage" Content="Trending Page" Height="300" Width="228"></Button>
-        </toolkit:WrapPanel>
+        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
+            <Button Name="btnHotPage" Content="9Gag" Margin="0,42,-6,454"></Button>
+        </Grid>
     </Grid>
  
     <!--Sample code showing usage of ApplicationBar-->

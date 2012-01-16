@@ -25,7 +25,11 @@ namespace NineGag
         {
             if(Height < 750 && Width < 600)
                 StretchMode = Stretch.Fill;
-            else StretchMode = Stretch.None;
+            else
+            {
+
+                StretchMode = Stretch.None;
+            }
         }
     }
 }

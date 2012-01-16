@@ -19,11 +19,20 @@ namespace NineGag
         private NineGagPage Page;
         private readonly BackgroundWorker _backgroundWorker;
         private BackgroundWork _work;
+        private double TotalImageScale = 1d;
+        private Point ImagePosition = new Point(0, 0);
+
+
+        private const double MAX_IMAGE_ZOOM = 5;
+        private Point _oldFinger1;
+        private Point _oldFinger2;
+        private double _oldScaleFactor;
+
         public GagsPage()
         {
             InitializeComponent();
             Page = new NineGagPage();
-
+            
             try
             {
                 _work = BackgroundWork.LoadPage;
@@ -48,11 +57,10 @@ namespace NineGag
 
             GestureListener gestureListener = GestureService.GetGestureListener(LayoutRoot);
             gestureListener.Flick += GestureListenerFlick;
-            gestureListener.Tap += gestureListener_Tap;
-            gestureListener.Hold += gestureListener_Hold;
-            gestureListener.DragStarted += gestureListener_DragStarted;
-            gestureListener.DragDelta += gestureListener_DragDelta;
-            gestureListener.DragCompleted += gestureListener_DragCompleted;
+            //gestureListener.Tap += gestureListener_Tap;
+            //gestureListener.Hold += gestureListener_Hold;
+            //gestureListener.DragStarted += gestureListener_DragStarted;
+            //gestureListener.DragCompleted += gestureListener_DragCompleted;
         }
 
         private bool Connected()
@@ -65,6 +73,7 @@ namespace NineGag
             try
             {
                 textBlock1.Visibility = Visibility.Collapsed;
+                GagText.Visibility = Visibility.Visible;
                 Page.Reset();
                 Page.LoadGags();
                 if (_work == BackgroundWork.LoadNextPage || _work == BackgroundWork.LoadPage)
@@ -121,26 +130,7 @@ namespace NineGag
         }
 
         #region Image Gestures
-        private void gestureListener_DragCompleted(object sender, DragCompletedGestureEventArgs e)
-        {
-        }
-
-        private void gestureListener_DragDelta(object sender, DragDeltaGestureEventArgs e)
-        {
-        }
-
-        private void gestureListener_DragStarted(object sender, DragStartedGestureEventArgs e)
-        {
-        }
-
-        private void gestureListener_Hold(object sender, GestureEventArgs e)
-        {
-        }
-
-        private void gestureListener_Tap(object sender, GestureEventArgs e)
-        {
-        }
-
+        
         private void GestureListenerFlick(object sender, FlickGestureEventArgs e)
         {
             if (e.Direction != System.Windows.Controls.Orientation.Horizontal) return;
@@ -177,6 +167,7 @@ namespace NineGag
                     }
                     else if (Page.CurrentImageId >= 0)
                     {
+                        GagText.Text = Page.GagItem.TextDescription;
                         GagImage.Stretch = Stretch.None;
                         GagImage.Source = Page.GagItem.Image;
                     }
@@ -202,6 +193,7 @@ namespace NineGag
                     if (Page.CurrentImageId < Page.GagCount)
                     {
                         GagImage.Stretch = Stretch.None;
+                        GagImageOpened(null, null);
                         GagImage.Source = Page.GagItem.Image;
                     }
                     else
@@ -238,70 +230,227 @@ namespace NineGag
         }
         #endregion
 
-        private void GagsPageLoaded(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (NavigationContext.QueryString.ContainsKey("Type"))
-                {
-                    string type = NavigationContext.QueryString["Type"];
-                    // MessageBox.Show("Page type is " + type + "link=" + Page.Link);
-                    if (Page == null)
-                        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
-                    else if (type == "HotPage")
-                        Page.Type = GagType.Hot;
-                    else if (type == "TrendingPage")
-                        Page.Type = GagType.Trending;
-                    else if (type == "VotePage")
-                        Page.Type = GagType.Vote;
-                    else if (type == "YouTubePage")
-                        Page.Type = GagType.Youtube;
-                    Page.PreviousPage = "FirstPage";
-                    Page.CurrentImageId = 0;
-                    //Page.GetFirstPage(GagType.Hot);
-                    //MessageBox.Show("First id is: " + Page.FirstPageId);
-                    //MessageBox.Show(Page.GetFirstPage(GagType.Hot));
-                }
-                else
-                {
-                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
-                }
-            }
-            catch (ArgumentNullException)
-            {
-                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
-            }
-        }
-
-        #region Pinch Events
-
-        private void OnPinchStarted(object sender, PinchStartedGestureEventArgs e)
-        {
-        }
-
-        private void OnPinchDelta(object sender, PinchGestureEventArgs e)
-        {
-        }
-
-        private void OnDragDelta(object sender, DragDeltaGestureEventArgs e)
-        {
-        }
-
-        private new void DoubleTap(object sender, GestureEventArgs e)
-        {
-        }
-        #endregion
+        //private void GagsPageLoaded(object sender, RoutedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        if (NavigationContext.QueryString.ContainsKey("Type"))
+        //        {
+        //            string type = NavigationContext.QueryString["Type"];
+        //            if (Page == null)
+        //                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+        //            else if (type == "HotPage")
+        //                Page.Type = GagType.Hot;
+        //            else if (type == "TrendingPage")
+        //                Page.Type = GagType.Trending;
+        //            else if (type == "VotePage")
+        //                Page.Type = GagType.Vote;
+        //            else if (type == "YouTubePage")
+        //                Page.Type = GagType.Youtube;
+        //            Page.PreviousPage = "FirstPage";
+        //            Page.CurrentImageId = 0;
+        //        }
+        //        else
+        //        {
+        //            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+        //        }
+        //    }
+        //    catch (ArgumentNullException)
+        //    {
+        //        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+        //    }
+        //}
 
         
+        
+        #region Utils
 
-        private void GagImage_ImageOpened(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Computes the translation needed to keep the image centered between your fingers.
+        /// </summary>
+        private Point GetTranslationDelta(
+            Point currentFinger1, Point currentFinger2,
+            Point oldFinger1, Point oldFinger2,
+            Point currentPosition, double scaleFactor)
+        {
+            var newPos1 = new Point(
+             currentFinger1.X + (currentPosition.X - oldFinger1.X) * scaleFactor,
+             currentFinger1.Y + (currentPosition.Y - oldFinger1.Y) * scaleFactor);
+
+            var newPos2 = new Point(
+             currentFinger2.X + (currentPosition.X - oldFinger2.X) * scaleFactor,
+             currentFinger2.Y + (currentPosition.Y - oldFinger2.Y) * scaleFactor);
+
+            var newPos = new Point(
+                (newPos1.X + newPos2.X) / 2,
+                (newPos1.Y + newPos2.Y) / 2);
+
+            return new Point(
+                newPos.X - currentPosition.X,
+                newPos.Y - currentPosition.Y);
+        }
+
+        /// <summary>
+        /// Updates the scaling factor by multiplying the delta.
+        /// </summary>
+        private void UpdateImageScale(double scaleFactor)
+        {
+            TotalImageScale *= scaleFactor;
+            ApplyScale();
+        }
+
+        /// <summary>
+        /// Applies the computed scale to the image control.
+        /// </summary>
+        private void ApplyScale()
+        {
+            ((CompositeTransform)GagImage.RenderTransform).ScaleX = TotalImageScale;
+            ((CompositeTransform)GagImage.RenderTransform).ScaleY = TotalImageScale;
+        }
+
+        /// <summary>
+        /// Updates the image position by applying the delta.
+        /// Checks that the image does not leave empty space around its edges.
+        /// </summary>
+        private void UpdateImagePosition(Point delta)
+        {
+            var newPosition = new Point(ImagePosition.X + delta.X, ImagePosition.Y + delta.Y);
+
+            if (newPosition.X > 0) newPosition.X = 0;
+            if (newPosition.Y > 0) newPosition.Y = 0;
+
+            if ((GagImage.ActualWidth * TotalImageScale) + newPosition.X < GagImage.ActualWidth)
+                newPosition.X = GagImage.ActualWidth - (GagImage.ActualWidth * TotalImageScale);
+
+            if ((GagImage.ActualHeight * TotalImageScale) + newPosition.Y < GagImage.ActualHeight)
+                newPosition.Y = GagImage.ActualHeight - (GagImage.ActualHeight * TotalImageScale);
+
+            ImagePosition = newPosition;
+
+            ApplyPosition();
+        }
+
+        /// <summary>
+        /// Applies the computed position to the image control.
+        /// </summary>
+        private void ApplyPosition()
+        {
+            ((CompositeTransform)GagImage.RenderTransform).TranslateX = ImagePosition.X;
+            ((CompositeTransform)GagImage.RenderTransform).TranslateY = ImagePosition.Y;
+        }
+
+        /// <summary>
+        /// Resets the zoom to its original scale and position
+        /// </summary>
+        private void ResetImagePosition()
+        {
+            TotalImageScale = 1;
+            ImagePosition = new Point(0, 0);
+            ApplyScale();
+            ApplyPosition();
+        }
+
+        /// <summary>
+        /// Checks that dragging by the given amount won't result in empty space around the image
+        /// </summary>
+        private bool IsDragValid(double scaleDelta, Point translateDelta)
+        {
+            if (ImagePosition.X + translateDelta.X > 0 || ImagePosition.Y + translateDelta.Y > 0)
+                return false;
+
+            if ((GagImage.ActualWidth * TotalImageScale * scaleDelta) + (ImagePosition.X + translateDelta.X) < GagImage.ActualWidth)
+                return false;
+
+            if ((GagImage.ActualHeight * TotalImageScale * scaleDelta) + (ImagePosition.Y + translateDelta.Y) < GagImage.ActualHeight)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Tells if the scaling is inside the desired range
+        /// </summary>
+        private bool IsScaleValid(double scaleDelta)
+        {
+            return (TotalImageScale * scaleDelta >= 1) && (TotalImageScale * scaleDelta <= MAX_IMAGE_ZOOM);
+        }
+
+        #endregion
+        #region Event handlers
+
+        /// <summary>
+        /// Initializes the zooming operation
+        /// </summary>
+        private void OnPinchStarted(object sender, PinchStartedGestureEventArgs e)
+        {
+            _oldFinger1 = e.GetPosition(GagImage, 0);
+            _oldFinger2 = e.GetPosition(GagImage, 1);
+            _oldScaleFactor = 1;
+        }
+
+        /// <summary>
+        /// Computes the scaling and translation to correctly zoom around your fingers.
+        /// </summary>
+        private void OnPinchDelta(object sender, PinchGestureEventArgs e)
+        {
+            var scaleFactor = e.DistanceRatio / _oldScaleFactor;
+            if (!IsScaleValid(scaleFactor))
+                return;
+
+            var currentFinger1 = e.GetPosition(GagImage, 0);
+            var currentFinger2 = e.GetPosition(GagImage, 1);
+
+            var translationDelta = GetTranslationDelta(
+                currentFinger1,
+                currentFinger2,
+                _oldFinger1,
+                _oldFinger2,
+                ImagePosition,
+                scaleFactor);
+
+            _oldFinger1 = currentFinger1;
+            _oldFinger2 = currentFinger2;
+            _oldScaleFactor = e.DistanceRatio;
+
+            UpdateImageScale(scaleFactor);
+            UpdateImagePosition(translationDelta);
+        }
+
+        /// <summary>
+        /// Moves the image around following your finger.
+        /// </summary>
+        private void OnDragDelta(object sender, DragDeltaGestureEventArgs e)
+        {
+            var translationDelta = new Point(e.HorizontalChange, e.VerticalChange);
+
+            if (IsDragValid(1, translationDelta))
+                UpdateImagePosition(translationDelta);
+        }
+
+        /// <summary>
+        /// Resets the image scaling and position
+        /// </summary>
+        private new void DoubleTap(object sender, GestureEventArgs e)
+        {
+            ResetImagePosition();
+        }
+
+        #endregion
+
+        private void GagImageOpened(object sender, RoutedEventArgs e)
         {
             try
             {
+                ResetImagePosition();
                 Page.GagItem.Height = GagImage.ActualHeight;
                 Page.GagItem.Width = GagImage.ActualWidth;
                 Page.GagItem.SetStretch();
-                GagImage.Stretch = Page.GagItem.StretchMode;
+                if(Page.GagItem.StretchMode == Stretch.None)
+                {
+                    GagImage.Width = Page.GagItem.Width;
+                }
+                else
+                    GagImage.Stretch = Page.GagItem.StretchMode;
                 GagText.Text = Page.GagItem.TextDescription;
             }
             catch
