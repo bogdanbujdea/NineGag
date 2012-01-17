@@ -77,7 +77,7 @@ namespace NineGag
                 if (_work == BackgroundWork.LoadNextPage || _work == BackgroundWork.LoadPage)
                     Page.CurrentImageId = 0; //if we loaded the next page, then we load the first gag
                 else Page.CurrentImageId = Page.GagCount - 1; //else, we load the last gag
-                //Page.GagItem.Image.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                //Load the image in the control
                 GagImage.Source = Page.GagItem.Image;
                 
             }
@@ -85,7 +85,7 @@ namespace NineGag
             {
                 if (exception is ArgumentException && exception.Message == "Not Connected")
                     MessageBox.Show("You are not connected to the internet. Please try again");
-                else if (exception is IndexOutOfRangeException)
+                else
                     MessageBox.Show(exception.Message);
             }
         }
