@@ -33,7 +33,7 @@
                 </Border>
                 <Line Height="3" Fill="Blue"></Line>
                 <Border>
-                    <Image ImageOpened="GagImageOpened" Name="GagImage" Height="695" Width="454">
+                    <MultiScaleImage  Name="GagImage" Height="695" Width="454">
                         <toolkit:GestureService.GestureListener>
                             <toolkit:GestureListener
                                 PinchStarted="OnPinchStarted"
@@ -41,12 +41,7 @@
                                 DragDelta="OnDragDelta"
                                DoubleTap="DoubleTap"/>
                         </toolkit:GestureService.GestureListener>
-                        <Image.RenderTransform>
-                            <CompositeTransform
-                        ScaleX="1" ScaleY="1"
-                        TranslateX="0" TranslateY="0"/>
-                        </Image.RenderTransform>
-                    </Image>
+                    </MultiScaleImage>
                 </Border>
                 
             </StackPanel>
