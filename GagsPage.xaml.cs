@@ -2,13 +2,9 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using System.Net.NetworkInformation;
-using GestureEventArgs = Microsoft.Phone.Controls.GestureEventArgs;
-
 namespace NineGag
 {
     public partial class GagsPage : PhoneApplicationPage
@@ -19,17 +15,7 @@ namespace NineGag
             LoadNextPage,
             LoadPage
         };
-        #region fields
 
-        private double zoom = 1;
-        private bool duringDrag = false;
-        private bool mouseDown = false;
-        private Point lastMouseDownPos = new Point();
-        private Point lastMousePos = new Point();
-        private Point lastMouseViewPort = new Point();
-        private Uri seadragonUrl = new Uri("http://static.seadragon.com/content/misc/");
-
-       
         private NineGagPage Page;
         private readonly BackgroundWorker _backgroundWorker;
         private BackgroundWork _work;
@@ -41,7 +27,7 @@ namespace NineGag
         private Point _oldFinger1;
         private Point _oldFinger2;
         private double _oldScaleFactor;
-        #endregion
+
         public GagsPage()
         {
             InitializeComponent();
@@ -71,197 +57,17 @@ namespace NineGag
 
             GestureListener gestureListener = GestureService.GetGestureListener(LayoutRoot);
             gestureListener.Flick += GestureListenerFlick;
-            this.GagImage.Loaded += new RoutedEventHandler(msi_Loaded);
-
-            //
-            // Firing an event when all of the images have been Loaded
-            //
-            this.GagImage.ImageOpenSucceeded += new RoutedEventHandler(msi_ImageOpenSucceeded);
-
-            //
-            // Handling all of the mouse and keyboard functionality
-            //
-            this.MouseMove += delegate(object sender, MouseEventArgs e)
-            {
-                lastMousePos = e.GetPosition(GagImage);
-
-                if (duringDrag)
-                {
-                    Point newPoint = lastMouseViewPort;
-                    newPoint.X += (lastMouseDownPos.X - lastMousePos.X) / GagImage.ActualWidth * GagImage.ViewportWidth;
-                    newPoint.Y += (lastMouseDownPos.Y - lastMousePos.Y) / GagImage.ActualWidth * GagImage.ViewportWidth;
-                    GagImage.ViewportOrigin = newPoint;
-                }
-            };
-
-            this.MouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs e)
-            {
-                lastMouseDownPos = e.GetPosition(GagImage);
-                lastMouseViewPort = GagImage.ViewportOrigin;
-
-                mouseDown = true;
-
-                GagImage.CaptureMouse();
-            };
-
-            this.MouseLeftButtonUp += delegate(object sender, MouseButtonEventArgs e)
-            {
-                if (!duringDrag)
-                {
-                    bool shiftDown = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
-                    double newzoom = zoom;
-
-                    if (shiftDown)
-                    {
-                        newzoom /= 2;
-                    }
-                    else
-                    {
-                        newzoom *= 2;
-                    }
-
-                    Zoom(newzoom, GagImage.ElementToLogicalPoint(this.lastMousePos));
-                }
-                duringDrag = false;
-                mouseDown = false;
-
-                GagImage.ReleaseMouseCapture();
-            };
-
-            this.MouseMove += delegate(object sender, MouseEventArgs e)
-            {
-                lastMousePos = e.GetPosition(GagImage);
-                if (mouseDown && !duringDrag)
-                {
-                    duringDrag = true;
-                    double w = GagImage.ViewportWidth;
-                    Point o = new Point(GagImage.ViewportOrigin.X, GagImage.ViewportOrigin.Y);
-                    GagImage.UseSprings = false;
-                    GagImage.ViewportOrigin = new Point(o.X, o.Y);
-                    GagImage.ViewportWidth = w;
-                    zoom = 1 / w;
-                    GagImage.UseSprings = true;
-                }
-
-                if (duringDrag)
-                {
-                    Point newPoint = lastMouseViewPort;
-                    newPoint.X += (lastMouseDownPos.X - lastMousePos.X) / GagImage.ActualWidth * GagImage.ViewportWidth;
-                    newPoint.Y += (lastMouseDownPos.Y - lastMousePos.Y) / GagImage.ActualWidth * GagImage.ViewportWidth;
-                    GagImage.ViewportOrigin = newPoint;
-                }
-            }; 
-        }
-
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-
-            string selectedIndex = "";
-            if (NavigationContext.QueryString.TryGetValue("selectedItem", out selectedIndex))
-            {
-                int index = int.Parse(selectedIndex);
-              
-                    //this.GagImage.Source = new DeepZoomImageTileSource(new Uri())
-                
-            }
+            //gestureListener.Tap += gestureListener_Tap;
+            //gestureListener.Hold += gestureListener_Hold;
+            //gestureListener.DragStarted += gestureListener_DragStarted;
+            //gestureListener.DragCompleted += gestureListener_DragCompleted;
         }
 
         private bool Connected()
         {
             return NetworkInterface.GetIsNetworkAvailable();
         }
-        #region GagImage events and methods
 
-        void msi_ImageOpenSucceeded(object sender, RoutedEventArgs e)
-        {
-            //If collection, this gets you a list of all of the MultiScaleSubImages
-            //
-            //foreach (MultiScaleSubImage subImage in GagImage.SubImages)
-            //{
-            //    // Do something
-            //}
-            Point point = this.GagImage.ViewportOrigin;
-            GagImage.ViewportWidth = 1;
-            GagImage.ViewportOrigin = new Point(0, -0.5);
-        }
-
-        void msi_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void Zoom(double newzoom, Point p)
-        {
-            if (newzoom < 0.5)
-            {
-                newzoom = 0.5;
-            }
-
-            GagImage.ZoomAboutLogicalPoint(newzoom / zoom, p.X, p.Y);
-            zoom = newzoom;
-        }
-
-        private void ZoomInClick(object sender, System.Windows.RoutedEventArgs e)
-        {
-            Zoom(zoom * 1.3, GagImage.ElementToLogicalPoint(new Point(.5 * GagImage.ActualWidth, .5 * GagImage.ActualHeight)));
-        }
-
-        private void ZoomOutClick(object sender, System.Windows.RoutedEventArgs e)
-        {
-            Zoom(zoom / 1.3, GagImage.ElementToLogicalPoint(new Point(.5 * GagImage.ActualWidth, .5 * GagImage.ActualHeight)));
-        }
-
-        private void GoHomeClick(object sender, System.Windows.RoutedEventArgs e)
-        {
-            this.GagImage.ViewportWidth = 1;
-            this.GagImage.ViewportOrigin = new Point(0, -0.55);
-            ZoomFactor = 1;
-        }
-
-        public double ZoomFactor
-        {
-            get { return zoom; }
-            set { zoom = value; }
-        }
-
-        private void GoFullScreenClick(object sender, System.Windows.RoutedEventArgs e)
-        {
-
-            GagImage.ZoomAboutLogicalPoint(1.5, 0, 0);
-        }
-
-        // Handling the VSM states
-        private void LeaveMovie(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            VisualStateManager.GoToState(this, "FadeOut", true);
-        }
-
-        private void EnterMovie(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            VisualStateManager.GoToState(this, "FadeIn", true);
-        }
-
-
-        // unused functions that show the inner math of Deep Zoom
-        public Rect GetImageRect()
-        {
-            return new Rect(-GagImage.ViewportOrigin.X / GagImage.ViewportWidth, -GagImage.ViewportOrigin.Y / GagImage.ViewportWidth, 1 / GagImage.ViewportWidth, 1 / GagImage.ViewportWidth * GagImage.AspectRatio);
-        }
-
-        public Rect ZoomAboutPoint(Rect img, double zAmount, Point pt)
-        {
-            return new Rect(pt.X + (img.X - pt.X) / zAmount, pt.Y + (img.Y - pt.Y) / zAmount, img.Width / zAmount, img.Height / zAmount);
-        }
-
-        public void LayoutDZI(Rect rect)
-        {
-            double ar = GagImage.AspectRatio;
-            GagImage.ViewportWidth = 1 / rect.Width;
-            GagImage.ViewportOrigin = new Point(-rect.Left / rect.Width, -rect.Top / rect.Width);
-        }
-
-        #endregion
         private void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             try
@@ -273,10 +79,9 @@ namespace NineGag
                 if (_work == BackgroundWork.LoadNextPage || _work == BackgroundWork.LoadPage)
                     Page.CurrentImageId = 0; //if we loaded the next page, then we load the first gag
                 else Page.CurrentImageId = Page.GagCount - 1; //else, we load the last gag
-                ////GagImage.Stretch = Stretch.None;
-                GagImage.Source = new DeepZoomImageTileSource(new Uri(Page.GagItem.ImageLink));
-                //GagImage.Source = Page.GagItem.Image;
-
+                GagImage.Stretch = Stretch.None;
+                GagImage.Source = Page.GagItem.Image;
+                
             }
             catch (Exception exception)
             {
@@ -363,9 +168,8 @@ namespace NineGag
                     else if (Page.CurrentImageId >= 0)
                     {
                         GagText.Text = Page.GagItem.TextDescription;
-                        //GagImage.Stretch = Stretch.None;
-
-                        GagImage.Source = new DeepZoomImageTileSource(new Uri(Page.GagItem.ImageLink));
+                        GagImage.Stretch = Stretch.None;
+                        GagImage.Source = Page.GagItem.Image;
                     }
                 }
                 catch (Exception exception)
@@ -388,10 +192,9 @@ namespace NineGag
                     Page.CurrentImageId++;
                     if (Page.CurrentImageId < Page.GagCount)
                     {
-                        //GagImage.Stretch = Stretch.None;
+                        GagImage.Stretch = Stretch.None;
                         GagImageOpened(null, null);
-
-                        GagImage.Source = new DeepZoomImageTileSource(new Uri(Page.GagItem.ImageLink));
+                        GagImage.Source = Page.GagItem.Image;
                     }
                     else
                     {
@@ -647,7 +450,7 @@ namespace NineGag
                     GagImage.Width = Page.GagItem.Width;
                 }
                 else
-                    //GagImage.Stretch = Page.GagItem.StretchMode;
+                    GagImage.Stretch = Page.GagItem.StretchMode;
                 GagText.Text = Page.GagItem.TextDescription;
             }
             catch
