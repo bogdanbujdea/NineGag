@@ -2,7 +2,9 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Phone.Controls;
 using System.Net.NetworkInformation;
 namespace NineGag
@@ -57,10 +59,6 @@ namespace NineGag
 
             GestureListener gestureListener = GestureService.GetGestureListener(LayoutRoot);
             gestureListener.Flick += GestureListenerFlick;
-            //gestureListener.Tap += gestureListener_Tap;
-            //gestureListener.Hold += gestureListener_Hold;
-            //gestureListener.DragStarted += gestureListener_DragStarted;
-            //gestureListener.DragCompleted += gestureListener_DragCompleted;
         }
 
         private bool Connected()
@@ -72,14 +70,14 @@ namespace NineGag
         {
             try
             {
-                textBlock1.Visibility = Visibility.Collapsed;
+                txtLoading.Visibility = Visibility.Collapsed;
                 GagText.Visibility = Visibility.Visible;
                 Page.Reset();
                 Page.LoadGags();
                 if (_work == BackgroundWork.LoadNextPage || _work == BackgroundWork.LoadPage)
                     Page.CurrentImageId = 0; //if we loaded the next page, then we load the first gag
                 else Page.CurrentImageId = Page.GagCount - 1; //else, we load the last gag
-                GagImage.Stretch = Stretch.None;
+                //Page.GagItem.Image.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
                 GagImage.Source = Page.GagItem.Image;
                 
             }
@@ -103,14 +101,14 @@ namespace NineGag
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                     NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute)));
             }
-
+            Deployment.Current.Dispatcher.BeginInvoke(() => GagText.Visibility = Visibility.Collapsed);
 
             var text = "Loading";
             const string dot = ".";
             int count = 0;
             while (Page.IsLoaded == false)
             {
-                Deployment.Current.Dispatcher.BeginInvoke(() => textBlock1.Text = text);
+                Deployment.Current.Dispatcher.BeginInvoke(() => txtLoading.Text = text);
 
                 Thread.Sleep(300);
                 if (count < 3)
@@ -126,6 +124,21 @@ namespace NineGag
                 if (!Connected())
                     break;
 
+            }
+        }
+
+        private void LoadImage()
+        {
+            try
+            {
+                ResetImagePosition();
+                Page.GagItem.SetStretch();
+                GagImage.Stretch = Page.GagItem.StretchMode;
+                GagText.Text = Page.GagItem.TextDescription;
+            }
+            catch
+            {
+                
             }
         }
 
@@ -159,7 +172,7 @@ namespace NineGag
                             Page.Link = "http://9gag.com/hot/" + Page.Id;
                             _work = BackgroundWork.LoadPreviousPage;
                             Page.IsLoaded = false;
-                            textBlock1.Visibility = Visibility.Visible;
+                            txtLoading.Visibility = Visibility.Visible;
                             GagImage.Source = null;
                             Page.Load();
                             _backgroundWorker.RunWorkerAsync();
@@ -167,9 +180,9 @@ namespace NineGag
                     }
                     else if (Page.CurrentImageId >= 0)
                     {
-                        GagText.Text = Page.GagItem.TextDescription;
-                        GagImage.Stretch = Stretch.None;
+                        Page.GagItem.Image.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
                         GagImage.Source = Page.GagItem.Image;
+                        LoadImage();
                     }
                 }
                 catch (Exception exception)
@@ -192,9 +205,10 @@ namespace NineGag
                     Page.CurrentImageId++;
                     if (Page.CurrentImageId < Page.GagCount)
                     {
-                        GagImage.Stretch = Stretch.None;
-                        GagImageOpened(null, null);
+                        ImageIsLoading = true;
+                        Page.GagItem.Image.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
                         GagImage.Source = Page.GagItem.Image;
+                        LoadImage();
                     }
                     else
                     {
@@ -209,7 +223,7 @@ namespace NineGag
                             Page.Link = "http://9gag.com/hot/" + Page.Id;
                             _work = BackgroundWork.LoadNextPage;
                             Page.IsLoaded = false;
-                            textBlock1.Visibility = Visibility.Visible;
+                            txtLoading.Visibility = Visibility.Visible;
                             GagImage.Source = null;
                             Page.Load();
                             _backgroundWorker.RunWorkerAsync();
@@ -228,6 +242,10 @@ namespace NineGag
                 }
             }
         }
+
+        public bool ImageIsLoading { get; set; }
+        
+
         #endregion
 
         //private void GagsPageLoaded(object sender, RoutedEventArgs e)
@@ -441,17 +459,7 @@ namespace NineGag
         {
             try
             {
-                ResetImagePosition();
-                Page.GagItem.Height = GagImage.ActualHeight;
-                Page.GagItem.Width = GagImage.ActualWidth;
-                Page.GagItem.SetStretch();
-                if(Page.GagItem.StretchMode == Stretch.None)
-                {
-                    GagImage.Width = Page.GagItem.Width;
-                }
-                else
-                    GagImage.Stretch = Page.GagItem.StretchMode;
-                GagText.Text = Page.GagItem.TextDescription;
+                LoadImage();
             }
             catch
             {

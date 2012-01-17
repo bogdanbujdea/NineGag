@@ -15,7 +15,7 @@
     shell:SystemTray.IsVisible="True" >
 
     <!--LayoutRoot is the root grid where all page content is placed-->
-    <Grid x:Name="LayoutRoot" Background="Transparent">
+    <Grid x:Name="LayoutRoot" Background="Transparent" Height="766" Width="480">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -26,14 +26,14 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <TextBlock HorizontalAlignment="Center" FontSize="40" FontFamily="Comic Sans MS" Height="50" Name="textBlock1" Text="Loading..." />
+            <TextBlock  HorizontalAlignment="Center" FontSize="40" FontFamily="Comic Sans MS" Height="50" Name="txtLoading" Text="Loading..." />
             <StackPanel>
                 <Border Background="White">
-                    <TextBlock Visibility="Collapsed" Foreground="Black" Name="GagText" Text="Loading..." FontFamily="Comic Sans MS" FontSize="25" Height="70"></TextBlock>
+                    <TextBlock TextWrapping="Wrap" Visibility="Collapsed" Foreground="Black" Name="GagText" Text="Loading..." FontFamily="Comic Sans MS" FontSize="25" Height="70"></TextBlock>
                 </Border>
                 <Line Height="3" Fill="Blue"></Line>
-                <Border>
-                    <Image ImageOpened="GagImageOpened" Name="GagImage" Height="695" Width="454">
+                <Border Width="450" Height="687">
+                    <Image ImageOpened="GagImageOpened" Name="GagImage" HorizontalAlignment="Center"  VerticalAlignment="Center" Source="/NineGag;component/Images/1872211_700b.jpg" Stretch="Uniform">
                         <toolkit:GestureService.GestureListener>
                             <toolkit:GestureListener
                                 PinchStarted="OnPinchStarted"

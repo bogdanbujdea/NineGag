@@ -1,18 +1,40 @@
-﻿using System.Windows.Media;
+﻿using System;
+using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace NineGag
 {
     public class GagItem
     {
+        private BitmapImage _image;
+        private string _textDescription;
         public string Name { get; set; }
         public string Id { get; set; }
-        public string TextDescription { get; set; }
+        public string TextDescription
+        {
+            get { return _textDescription; }
+            set { _textDescription = value.Replace("&#039;", "'"); }
+        }
         public string URL { get; set; }
         public string User { get; set; }
         public string ImageLink { get; set; }
 
-        public BitmapImage Image { get; set; }
+        public GagItem()
+        {
+           
+        }
+
+        public BitmapImage Image
+        {
+            get { return _image; }
+            set
+            {
+                _image = value;
+                
+            } }
+
+        
 
 
         public GagType Type { get; set; }
@@ -23,12 +45,13 @@ namespace NineGag
 
         public void SetStretch()
         {
-            if(Height < 750 && Width < 600)
-                StretchMode = Stretch.Fill;
+            Height = Image.PixelHeight;
+            Width = Image.PixelWidth;
+            if (Height < 600 && Width < 600)
+                StretchMode = Stretch.Uniform;
             else
             {
-
-                StretchMode = Stretch.None;
+                StretchMode = Stretch.Uniform;
             }
         }
     }
