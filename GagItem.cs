@@ -34,9 +34,6 @@ namespace NineGag
                 
             } }
 
-        
-
-
         public GagType Type { get; set; }
 
         public double Height { get; set; }

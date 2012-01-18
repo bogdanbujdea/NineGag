@@ -28,7 +28,12 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <Button Name="btnHotPage" Content="9Gag" Margin="0,42,-6,454"></Button>
+            <toolkit:WrapPanel Height="607" HorizontalAlignment="Left" Margin="12,0,0,0" Name="wrapPanel" VerticalAlignment="Top" Width="456" Grid.Row="1">
+                <Button Name="btnHotPage" Content="Hot" Width="228" Height="300"></Button>
+                <Button Name="btnTrendingPage" Content="Trending" Height="300" Width="228"></Button>
+                <Button Name="btnVotePage" Content="Vote" Height="300" Width="228"></Button>
+                <Button Name="btnTopPage" Content="Top" Height="300" Width="228"></Button>
+            </toolkit:WrapPanel>
         </Grid>
     </Grid>
  

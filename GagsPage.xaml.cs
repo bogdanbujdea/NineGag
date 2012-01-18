@@ -19,7 +19,7 @@ namespace NineGag
         };
 
         private NineGagPage Page;
-        private readonly BackgroundWorker _backgroundWorker;
+        private BackgroundWorker _backgroundWorker;
         private BackgroundWork _work;
         private double TotalImageScale = 1d;
         private Point ImagePosition = new Point(0, 0);
@@ -35,30 +35,7 @@ namespace NineGag
             InitializeComponent();
             Page = new NineGagPage();
             
-            try
-            {
-                _work = BackgroundWork.LoadPage;
-                Page.GetFirstPage(GagType.Hot);
-            }
-            catch (Exception exception)
-            {
-                if (exception is ArgumentException)
-                {
-                    MessageBox.Show("You are not connected to the internet. Please try again!");
-                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
-                }
-                
-            }
-
-            _backgroundWorker = new BackgroundWorker();
-            _backgroundWorker.DoWork += BackgroundWorkerDoWork;
-            _backgroundWorker.RunWorkerCompleted += BackgroundWorkerRunWorkerCompleted;
-
-            _work = BackgroundWork.LoadPage;
-            _backgroundWorker.RunWorkerAsync();
-
-            GestureListener gestureListener = GestureService.GetGestureListener(LayoutRoot);
-            gestureListener.Flick += GestureListenerFlick;
+            
         }
 
         private bool Connected()
@@ -160,7 +137,10 @@ namespace NineGag
                         int i;
                         if (Int32.TryParse(link, out i))
                         {
-                            string tmp = "/hot/" + i;
+
+                            string caps = Page.Type.ToString();
+                            caps = caps.ToLower();
+                            string tmp = "/" + caps + "/" + i.ToString();
                             if (tmp == Page.FirstPageId)
                             {
                                 Page.CurrentImageId = 0;
@@ -169,7 +149,7 @@ namespace NineGag
                             }
                             i++;
                             Page.Id = i.ToString();
-                            Page.Link = "http://9gag.com/hot/" + Page.Id;
+                            Page.Link = "http://9gag.com/" + caps + "/" + Page.Id;
                             _work = BackgroundWork.LoadPreviousPage;
                             Page.IsLoaded = false;
                             txtLoading.Visibility = Visibility.Visible;
@@ -220,7 +200,9 @@ namespace NineGag
                         {
                             i--;
                             Page.Id = i.ToString();
-                            Page.Link = "http://9gag.com/hot/" + Page.Id;
+                            string caps = Page.Type.ToString();
+                            caps = caps.ToLower();
+                            Page.Link = "http://9gag.com/" + caps + "/" + Page.Id;
                             _work = BackgroundWork.LoadNextPage;
                             Page.IsLoaded = false;
                             txtLoading.Visibility = Visibility.Visible;
@@ -248,36 +230,67 @@ namespace NineGag
 
         #endregion
 
-        //private void GagsPageLoaded(object sender, RoutedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        if (NavigationContext.QueryString.ContainsKey("Type"))
-        //        {
-        //            string type = NavigationContext.QueryString["Type"];
-        //            if (Page == null)
-        //                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
-        //            else if (type == "HotPage")
-        //                Page.Type = GagType.Hot;
-        //            else if (type == "TrendingPage")
-        //                Page.Type = GagType.Trending;
-        //            else if (type == "VotePage")
-        //                Page.Type = GagType.Vote;
-        //            else if (type == "YouTubePage")
-        //                Page.Type = GagType.Youtube;
-        //            Page.PreviousPage = "FirstPage";
-        //            Page.CurrentImageId = 0;
-        //        }
-        //        else
-        //        {
-        //            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
-        //        }
-        //    }
-        //    catch (ArgumentNullException)
-        //    {
-        //        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
-        //    }
-        //}
+        private void GagsPageLoaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (NavigationContext.QueryString.ContainsKey("Type"))
+                {
+                    string type = NavigationContext.QueryString["Type"];
+                    if (Page == null)
+                        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+                    else switch (type)
+                    {
+                        case "HotPage":
+                            Page.Type = PageType.Hot;
+                            break;
+                        case "TrendingPage":
+                            Page.Type = PageType.Trending;
+                            break;
+                        case "VotePage":
+                            Page.Type = PageType.Vote;
+                            break;
+                        case "TopPage":
+                            Page.Type = PageType.Top;
+                            break;
+                    }
+                    Page.PreviousPage = "FirstPage";
+                    Page.CurrentImageId = 0;
+                    try
+                    {
+                        _work = BackgroundWork.LoadPage;
+                        Page.GetFirstPage(Page.Type);
+                    }
+                    catch (Exception exception)
+                    {
+                        if (exception is ArgumentException)
+                        {
+                            MessageBox.Show("You are not connected to the internet. Please try again!");
+                            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+                        }
+
+                    }
+
+                    _backgroundWorker = new BackgroundWorker();
+                    _backgroundWorker.DoWork += BackgroundWorkerDoWork;
+                    _backgroundWorker.RunWorkerCompleted += BackgroundWorkerRunWorkerCompleted;
+
+                    _work = BackgroundWork.LoadPage;
+                    _backgroundWorker.RunWorkerAsync();
+
+                    GestureListener gestureListener = GestureService.GetGestureListener(LayoutRoot);
+                    gestureListener.Flick += GestureListenerFlick;
+                }
+                else
+                {
+                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+                }
+            }
+            catch (Exception)
+            {
+                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
+            }
+        }
 
         
         

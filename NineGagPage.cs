@@ -11,12 +11,18 @@ using System.Net.NetworkInformation;
 
 namespace NineGag
 {
-    public enum GagType
+    public enum PageType
     {
         Hot,
         Trending,
         Vote,
-        Youtube
+        Top
+    };
+
+    public enum GagType
+    {
+        Hot,
+        YouTube
     };
 
     public enum DownloadType
@@ -38,21 +44,6 @@ namespace NineGag
         public string NextPage { get; set; }
         public string Id { get; set; }
         public string FirstPageId { get; set; }
-
-
-        public NineGagPage(List<GagItem> gags)
-        {
-            _gags = gags;
-            GagCount = _gags.Count;
-        }
-
-        public NineGagPage()
-        {
-            Link = "http://www.9gag.com";
-            _document = new HtmlDocument(); //allocate memory to the _document
-            _gags = new List<GagItem>();
-            IsLoaded = false;
-        }
         
         public GagItem GagItem
         {
@@ -68,7 +59,21 @@ namespace NineGag
             set { _gags[CurrentImageId] = value; }
         }
 
-        public GagType Type { get; set; }
+        public PageType Type { get; set; }
+
+        public NineGagPage(List<GagItem> gags)
+        {
+            _gags = gags;
+            GagCount = _gags.Count;
+        }
+
+        public NineGagPage()
+        {
+            Link = "http://www.9gag.com";
+            _document = new HtmlDocument(); //allocate memory to the _document
+            _gags = new List<GagItem>();
+            IsLoaded = false;
+        }
 
         //public int properties
         public int GagCount { get; set; }
@@ -119,19 +124,19 @@ namespace NineGag
                         {
                             if (type[i] == "img-wrap")
                             {
-                                gagItem.Type = Type;
+                                //gagItem.Type = Type;
                                 i = 99;
                                 break;
                             }
                             if (type[i] == "video-post")
                             {
-                                gagItem.Type = GagType.Youtube;
+                                gagItem.Type = GagType.YouTube;
                                 i = 99;
                                 break;
                             }
                             i++;
                         }
-                    if (gagItem.Type != GagType.Youtube) //if the GagItem it's an image
+                    if (gagItem.Type != GagType.YouTube) //if the GagItem it's an image
                     {
                         string[] imageLink = node.Descendants("img").Select(
                             x => x.GetAttributeValue("src", null)).ToArray(); //get it's image link
@@ -239,16 +244,33 @@ namespace NineGag
             return true;
         }
 
-        public async void GetFirstPage(GagType type)
+        public async void GetFirstPage(PageType type)
         {
             var firstPage = false;
             if (!Connected())
                 return;
             try
             {
-                if (Type == GagType.Hot)
+                string pageType = "";
+                switch (Type)
                 {
-                    string link = "http://9gag.com";
+                    case PageType.Hot:
+                        pageType = "hot";
+                        break;
+                    case PageType.Trending:
+                        pageType = "trending";
+                        break;
+                    case PageType.Vote:
+                        pageType = "vote";
+                        break;
+                    case PageType.Top:
+                        pageType = "top";
+                        break;
+                }
+                
+                if(pageType.Any())
+                {
+                    string link = "http://9gag.com/" + pageType;
                     string result =
                         await new WebClient().DownloadStringTaskAsync(new Uri(link, UriKind.RelativeOrAbsolute));
                     _document.LoadHtml(result);
@@ -268,7 +290,7 @@ namespace NineGag
                             if (int.TryParse(link, out pageId) == false)
                                 link = "0";
                             pageId++;
-                            link = "http://9gag.com/hot/";
+                            link = "http://9gag.com/" + pageType + "/";
                             link += pageId.ToString();
                             string doc =
                                 await new WebClient().DownloadStringTaskAsync(new Uri(link, UriKind.RelativeOrAbsolute));
