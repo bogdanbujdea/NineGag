@@ -14,16 +14,13 @@ namespace NineGag
         public string TextDescription
         {
             get { return _textDescription; }
-            set { _textDescription = value.Replace("&#039;", "'"); }
+            set { _textDescription = value.Replace("&#039;", "'");
+                _textDescription = _textDescription.Replace("&quot;", "\"");
+            }
         }
         public string URL { get; set; }
         public string User { get; set; }
         public string ImageLink { get; set; }
-
-        public GagItem()
-        {
-           
-        }
 
         public BitmapImage Image
         {

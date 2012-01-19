@@ -34,7 +34,11 @@ namespace NineGag
         {
             InitializeComponent();
             Page = new NineGagPage();
-            
+            _backgroundWorker = new BackgroundWorker();
+            _backgroundWorker.DoWork += BackgroundWorkerDoWork;
+            _backgroundWorker.RunWorkerCompleted += BackgroundWorkerRunWorkerCompleted;
+            GestureListener gestureListener = GestureService.GetGestureListener(LayoutRoot);
+            gestureListener.Flick += GestureListenerFlick;
             
         }
 
@@ -133,6 +137,14 @@ namespace NineGag
                     {
                         if(!Connected())
                             throw new ArgumentException();
+                        if(Page.Type == PageType.Top)
+                        {
+                            string tmp = Page.FirstPageId;
+                            int id;
+                            Int32.TryParse(Page.GetIdFromLink(Page.Link), out id);
+                            if (id == 1)
+                                ReachedFirstPage();
+                        }
                         string link = Page.Id;
                         int i;
                         if (Int32.TryParse(link, out i))
@@ -143,8 +155,7 @@ namespace NineGag
                             string tmp = "/" + caps + "/" + i.ToString();
                             if (tmp == Page.FirstPageId)
                             {
-                                Page.CurrentImageId = 0;
-                                MessageBox.Show("There are no newer gags");
+                                ReachedFirstPage();
                                 return;
                             }
                             i++;
@@ -225,6 +236,22 @@ namespace NineGag
             }
         }
 
+        private void ReachedFirstPage()
+        {
+            Page.CurrentImageId = 0;
+            MessageBoxResult messageBoxResult = MessageBox.Show("There are no newer gags. Do you want to refresh this page?", "This is the first page", MessageBoxButton.OKCancel);
+            if (messageBoxResult == MessageBoxResult.OK) 
+                RefreshPage();
+        }
+
+        private void RefreshPage()
+        {
+            Page.Reset();
+            Page.IsLoaded = false;
+            _backgroundWorker.RunWorkerAsync();
+            Page.Load();
+        }
+
         public bool ImageIsLoading { get; set; }
         
 
@@ -234,6 +261,7 @@ namespace NineGag
         {
             try
             {
+                string topType;
                 if (NavigationContext.QueryString.ContainsKey("Type"))
                 {
                     string type = NavigationContext.QueryString["Type"];
@@ -250,8 +278,33 @@ namespace NineGag
                         case "VotePage":
                             Page.Type = PageType.Vote;
                             break;
-                        case "TopPage":
+                        case "top":
                             Page.Type = PageType.Top;
+                            if (NavigationContext.QueryString.ContainsKey("TopType"))
+                            {
+                                topType = NavigationContext.QueryString["TopType"];
+                                Page.FirstPageId = "1";
+                                Page.Link = "http://9gag.com/top/" + topType + "/1";
+                                switch (topType)
+                                {
+                                    case "day":
+                                        Page.TopType = Top.TopDay;
+                                        break;
+                                    case "week":
+                                        Page.TopType = Top.TopWeek;
+                                        break;
+                                    case "month":
+                                        Page.TopType = Top.TopMonth;
+                                        break;
+                                    case "all":
+                                        Page.TopType = Top.TopAll;
+                                        break;
+                                }
+                                _work = BackgroundWork.LoadPage;
+                                _backgroundWorker.RunWorkerAsync();
+                                Page.Load();
+                                return;
+                            }
                             break;
                     }
                     Page.PreviousPage = "FirstPage";
@@ -271,15 +324,11 @@ namespace NineGag
 
                     }
 
-                    _backgroundWorker = new BackgroundWorker();
-                    _backgroundWorker.DoWork += BackgroundWorkerDoWork;
-                    _backgroundWorker.RunWorkerCompleted += BackgroundWorkerRunWorkerCompleted;
-
+                    
                     _work = BackgroundWork.LoadPage;
                     _backgroundWorker.RunWorkerAsync();
 
-                    GestureListener gestureListener = GestureService.GetGestureListener(LayoutRoot);
-                    gestureListener.Flick += GestureListenerFlick;
+                    
                 }
                 else
                 {
@@ -477,6 +526,11 @@ namespace NineGag
             catch
             {
             }
+        }
+
+        private void PhoneApplicationPage_BackKeyPress(object sender, CancelEventArgs e)
+        {
+
         }
     }
 }

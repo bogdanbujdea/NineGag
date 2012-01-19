@@ -19,6 +19,14 @@ namespace NineGag
         Top
     };
 
+    public enum Top
+    {
+        TopDay,
+        TopWeek,
+        TopMonth,
+        TopAll
+    };
+
     public enum GagType
     {
         Hot,
@@ -60,6 +68,8 @@ namespace NineGag
         }
 
         public PageType Type { get; set; }
+
+        public Top TopType { get; set; }
 
         public NineGagPage(List<GagItem> gags)
         {
@@ -263,9 +273,6 @@ namespace NineGag
                     case PageType.Vote:
                         pageType = "vote";
                         break;
-                    case PageType.Top:
-                        pageType = "top";
-                        break;
                 }
                 
                 if(pageType.Any())
@@ -319,7 +326,6 @@ namespace NineGag
                             catch
                             {
                                 firstPage = true;
-
                                 Link = "http://9gag.com";
                                 FirstPageId = "/hot/0";
                             }
@@ -335,7 +341,7 @@ namespace NineGag
         }
         
         //private methods
-        private string GetIdFromLink(string link)
+        public string GetIdFromLink(string link)
         {
             string[] words = link.Split('/');
             int i;

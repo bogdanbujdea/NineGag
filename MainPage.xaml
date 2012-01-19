@@ -11,8 +11,46 @@
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    shell:SystemTray.IsVisible="True" xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit">
+    shell:SystemTray.IsVisible="True" xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit" BackKeyPress="PhoneApplicationPage_BackKeyPress">
+    <phone:PhoneApplicationPage.Resources>
+        <Style x:Key="TbStyle" TargetType="TextBlock">
+            <Setter Property="Foreground">
+                <Setter.Value>
+                    <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                        <GradientStop Color="#FF0622BE" Offset="0.988"/>
+                        <GradientStop Color="White" Offset="0"/>
+                        <GradientStop Color="#FF0E29C0" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Visibility" Value="Visible"/>
+            <Setter Property="FontFamily" Value="/FunApp;component/Fonts/Fonts.zip#Jokerman"/>
+            <Setter Property="FontSize" Value="32"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontStyle" Value="Normal"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <CompositeTransform SkewX="0"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Projection">
+                <Setter.Value>
+                    <PlaneProjection GlobalOffsetX="-1" CenterOfRotationX="0" CenterOfRotationY="0" RotationX="0" RotationY="0" RotationZ="0"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Name="PickerFunTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Border Background="Beige" Width="Auto" Height="34">
+                    <TextBlock Text="{Binding Name}" Style="{StaticResource TbStyle}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center">
 
+                    </TextBlock>
+                </Border>
+            </StackPanel>
+        </DataTemplate>
+    </phone:PhoneApplicationPage.Resources>
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <Grid.RowDefinitions>
@@ -32,8 +70,12 @@
                 <Button Name="btnHotPage" Content="Hot" Width="228" Height="300"></Button>
                 <Button Name="btnTrendingPage" Content="Trending" Height="300" Width="228"></Button>
                 <Button Name="btnVotePage" Content="Vote" Height="300" Width="228"></Button>
-                <Button Name="btnTopPage" Content="Top" Height="300" Width="228"></Button>
+                <Button Name="btnTopPage" Content="Top" Height="300" Width="228" Click="btnTopPage_Click"></Button>
+                
             </toolkit:WrapPanel>
+            <TextBlock Name="txtTop" FontSize="25" FontFamily="Lucida Sans Unicode" Text="Choose one:" Visibility="Collapsed"></TextBlock>
+            <toolkit:ListPicker Background="Beige" SelectionChanged="TopTypeChanged" VerticalAlignment="Center" Visibility="Collapsed" Height="Auto" x:Name="TopMenu" Width="Auto"  Header="TopType" CacheMode="BitmapCache" ItemTemplate="{StaticResource PickerFunTemplate}" />
+            <Button Height="50" Visibility="Collapsed" Name="btnGo" Content="Go" VerticalAlignment="Bottom" Click="btnGo_Click"></Button>
         </Grid>
     </Grid>
  
