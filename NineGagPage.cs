@@ -15,12 +15,6 @@ namespace NineGag
     {
         Hot,
         Trending,
-        Vote,
-        Top
-    };
-
-    public enum Top
-    {
         TopDay,
         TopWeek,
         TopMonth,
@@ -68,8 +62,6 @@ namespace NineGag
         }
 
         public PageType Type { get; set; }
-
-        public Top TopType { get; set; }
 
         public NineGagPage(List<GagItem> gags)
         {
@@ -236,6 +228,9 @@ namespace NineGag
 
         public void Load()
         {
+            DateTime dateTime = DateTime.Now;
+            int millisecond = dateTime.Millisecond;
+            Link += "?=" + millisecond.ToString();
             HtmlWeb.LoadAsync(Link, (sender, doc) =>
                                         {
                                             _document = doc.Document ?? null;
@@ -269,9 +264,6 @@ namespace NineGag
                         break;
                     case PageType.Trending:
                         pageType = "trending";
-                        break;
-                    case PageType.Vote:
-                        pageType = "vote";
                         break;
                 }
                 

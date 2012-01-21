@@ -137,13 +137,16 @@ namespace NineGag
                     {
                         if(!Connected())
                             throw new ArgumentException();
-                        if(Page.Type == PageType.Top)
+                        if(Page.Type != PageType.Hot && Page.Type != PageType.Trending)
                         {
                             string tmp = Page.FirstPageId;
                             int id;
                             Int32.TryParse(Page.GetIdFromLink(Page.Link), out id);
                             if (id == 1)
+                            {
                                 ReachedFirstPage();
+                                return;
+                            }
                         }
                         string link = Page.Id;
                         int i;
@@ -246,8 +249,11 @@ namespace NineGag
 
         private void RefreshPage()
         {
+            GagImage.Source = null;
             Page.Reset();
             Page.IsLoaded = false;
+            Page.Load();
+            _work = BackgroundWork.LoadPage;
             _backgroundWorker.RunWorkerAsync();
             Page.Load();
         }
@@ -269,49 +275,44 @@ namespace NineGag
                         NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
                     else switch (type)
                     {
-                        case "HotPage":
+                        case "hot":
                             Page.Type = PageType.Hot;
                             break;
-                        case "TrendingPage":
+                        case "trending":
                             Page.Type = PageType.Trending;
                             break;
-                        case "VotePage":
-                            Page.Type = PageType.Vote;
-                            break;
-                        case "top":
-                            Page.Type = PageType.Top;
-                            if (NavigationContext.QueryString.ContainsKey("TopType"))
+                        default:
+                            switch (type)
                             {
-                                topType = NavigationContext.QueryString["TopType"];
+                                case "day":
+                                    Page.Type = PageType.TopDay;
+                                    break;
+                                case "week":
+                                    Page.Type = PageType.TopWeek;
+                                    break;
+                                case "month":
+                                    Page.Type = PageType.TopMonth;
+                                    break;
+                                case "all":
+                                    Page.Type = PageType.TopAll;
+                                    break;
+                            }
                                 Page.FirstPageId = "1";
-                                Page.Link = "http://9gag.com/top/" + topType + "/1";
-                                switch (topType)
-                                {
-                                    case "day":
-                                        Page.TopType = Top.TopDay;
-                                        break;
-                                    case "week":
-                                        Page.TopType = Top.TopWeek;
-                                        break;
-                                    case "month":
-                                        Page.TopType = Top.TopMonth;
-                                        break;
-                                    case "all":
-                                        Page.TopType = Top.TopAll;
-                                        break;
-                                }
+                                Page.Link = "http://9gag.com/top/" + type + "/1";
+                               
                                 _work = BackgroundWork.LoadPage;
                                 _backgroundWorker.RunWorkerAsync();
                                 Page.Load();
-                                return;
-                            }
-                            break;
+                            return;
                     }
+                    
+                    
                     Page.PreviousPage = "FirstPage";
                     Page.CurrentImageId = 0;
                     try
                     {
                         _work = BackgroundWork.LoadPage;
+                        _backgroundWorker.RunWorkerAsync();
                         Page.GetFirstPage(Page.Type);
                     }
                     catch (Exception exception)
@@ -323,17 +324,8 @@ namespace NineGag
                         }
 
                     }
-
-                    
-                    _work = BackgroundWork.LoadPage;
-                    _backgroundWorker.RunWorkerAsync();
-
-                    
                 }
-                else
-                {
-                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.RelativeOrAbsolute));
-                }
+
             }
             catch (Exception)
             {

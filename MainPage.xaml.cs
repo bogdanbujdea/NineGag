@@ -15,83 +15,52 @@ namespace NineGag
 {
     public partial class MainPage : PhoneApplicationPage
     {
+        private string top;
+
         // Constructor
         public MainPage()
         {
             InitializeComponent();
-            var items = new List<TopType>();
-            items.Add(new TopType() { Name = "Top 24" });
-            items.Add(new TopType() { Name = "Top Week" });
-            items.Add(new TopType() { Name = "Top Month" });
-            items.Add(new TopType() { Name = "Top All" });
-            TopMenu.ItemsSource = items;
-            btnHotPage.Click += new RoutedEventHandler(ChangePage);
-            btnTopPage.Click += ChangePage;
-            btnTrendingPage.Click += ChangePage;
-            btnVotePage.Click += ChangePage;
+            var items = new List<FunType>
+                            {
+                                new FunType() {Name = "Hot Page"},
+                                new FunType() {Name = "Trending Page"},
+                                new FunType() {Name = "Top 24"},
+                                new FunType() {Name = "Top Week"},
+                                new FunType() {Name = "Top Month"},
+                                new FunType() {Name = "Top All"}
+                            };
+            top = "hot";
+            FunMenu.ItemsSource = items;
         }
 
-        private void ChangePage(object sender, RoutedEventArgs e)
-        {
-            Button btn = sender as Button;
-            string pageType = "HotPage";
-            try
-            {
-                if (btn.Equals(btnHotPage))
-                    pageType = "HotPage";
-                else if (btn.Equals(btnTopPage))
-                    //pageType = "TopPage";
-                    return;
-                else if (btn.Equals(btnTrendingPage))
-                    pageType = "TrendingPage";
-                else if (btn.Equals(btnVotePage))
-                    pageType = "VotePage";
-                MessageBox.Show("Page type is " + pageType);
-                if (NavigationService.Navigate(new Uri("/GagsPage.xaml?Type=" + pageType, UriKind.RelativeOrAbsolute)) != true)
-                    MessageBox.Show("Can't change page");
-            }
-            catch
-            {
-                MessageBox.Show("Can't change page");
-            }
-        }
 
-        private void btnTopPage_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                TopMenu.Visibility = Visibility.Visible;
-                txtTop.Visibility = Visibility.Visible;
-                btnGo.Visibility = Visibility.Visible;
-                btnVotePage.Visibility = Visibility.Collapsed;
-                btnHotPage.Visibility = Visibility.Collapsed;
-                btnTopPage.Visibility = Visibility.Collapsed;
-                btnTrendingPage.Visibility = Visibility.Collapsed;
-            }
-            catch 
-            {
-                
-            }
-        }
 
-        private void TopTypeChanged(object sender, SelectionChangedEventArgs e)
+
+        private void FunTypeChanged(object sender, SelectionChangedEventArgs e)
         {
-            string top = "";
+            
             try
             {
-                if (TopMenu != null && TopMenu.ItemContainerGenerator != null)
+                if (FunMenu != null && FunMenu.ItemContainerGenerator != null)
                 {
                     var selectedItem =
-                        TopMenu.ItemContainerGenerator.ContainerFromItem(TopMenu.SelectedItem) as ListPickerItem;
+                        FunMenu.ItemContainerGenerator.ContainerFromItem(FunMenu.SelectedItem) as ListPickerItem;
 
                     if (selectedItem != null)
                     {
-                        var data = selectedItem.DataContext as TopType;
+                        var data = selectedItem.DataContext as FunType;
 
                         if (data != null)
                         {
                             switch (data.Name)
                             {
+                                case "Hot Page":
+                                    top = "hot";
+                                    break;
+                                case "Trending Page":
+                                    top = "trending";
+                                    break;
                                 case "Top 24":
                                     top = "day";
                                     break;
@@ -108,8 +77,7 @@ namespace NineGag
                                     MessageBox.Show("Wrong Selection");
                                     return;
                             }
-                            if (NavigationService.Navigate(new Uri("/GagsPage.xaml?Type=top&TopType=" + top, UriKind.RelativeOrAbsolute)) != true)
-                                MessageBox.Show("Can't change page");
+                            
                         }
                     }
                 }
@@ -117,20 +85,11 @@ namespace NineGag
             catch
             {
                 MessageBox.Show("Can't change page. Please try again");
-                Reset();
+                
             }
         }
 
-        private void Reset()
-        {
-            TopMenu.Visibility = Visibility.Collapsed; //menu is collapsed
-            txtTop.Visibility = Visibility.Collapsed; //txt is collapsed
-            btnVotePage.Visibility = Visibility.Visible; //buttons are visible
-            btnHotPage.Visibility = Visibility.Visible;
-            btnTopPage.Visibility = Visibility.Visible;
-            btnTrendingPage.Visibility = Visibility.Visible;
-            btnGo.Visibility = Visibility.Collapsed;
-        }
+      
 
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -139,7 +98,9 @@ namespace NineGag
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
         {
-
+            MessageBox.Show("Type is " + top);
+            if (NavigationService.Navigate(new Uri("/GagsPage.xaml?Type=" + top, UriKind.RelativeOrAbsolute)) != true)
+                MessageBox.Show("Can't change page");
         }
 
        

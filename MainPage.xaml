@@ -45,9 +45,13 @@
                 <Border Background="Beige" Width="Auto" Height="34">
                     <TextBlock Text="{Binding Name}" Style="{StaticResource TbStyle}"
                                HorizontalAlignment="Center" VerticalAlignment="Center">
-
                     </TextBlock>
                 </Border>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Name="PickerFullModeItemTemplate">
+            <StackPanel Orientation="Horizontal" Margin="16 21 0 20">
+                <TextBlock Text="{Binding Name}" Margin="16 0 0 0" FontSize="43" FontFamily="{StaticResource PhoneFontFamilyLight}"/>
             </StackPanel>
         </DataTemplate>
     </phone:PhoneApplicationPage.Resources>
@@ -66,16 +70,14 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <toolkit:WrapPanel Height="607" HorizontalAlignment="Left" Margin="12,0,0,0" Name="wrapPanel" VerticalAlignment="Top" Width="456" Grid.Row="1">
-                <Button Name="btnHotPage" Content="Hot" Width="228" Height="300"></Button>
-                <Button Name="btnTrendingPage" Content="Trending" Height="300" Width="228"></Button>
-                <Button Name="btnVotePage" Content="Vote" Height="300" Width="228"></Button>
-                <Button Name="btnTopPage" Content="Top" Height="300" Width="228" Click="btnTopPage_Click"></Button>
-                
-            </toolkit:WrapPanel>
-            <TextBlock Name="txtTop" FontSize="25" FontFamily="Lucida Sans Unicode" Text="Choose one:" Visibility="Collapsed"></TextBlock>
-            <toolkit:ListPicker Background="Beige" SelectionChanged="TopTypeChanged" VerticalAlignment="Center" Visibility="Collapsed" Height="Auto" x:Name="TopMenu" Width="Auto"  Header="TopType" CacheMode="BitmapCache" ItemTemplate="{StaticResource PickerFunTemplate}" />
-            <Button Height="50" Visibility="Collapsed" Name="btnGo" Content="Go" VerticalAlignment="Bottom" Click="btnGo_Click"></Button>
+            <StackPanel>
+                <TextBlock Name="txtFunText" FontSize="25" FontFamily="Lucida Sans Unicode" Text="Choose your fun:" ></TextBlock>
+                <toolkit:ListPicker  Background="Beige" Height="Auto" x:Name="FunMenu" Width="Auto" SelectionChanged="FunTypeChanged" ItemTemplate="{StaticResource PickerFunTemplate}"  FullModeItemTemplate="{StaticResource PickerFullModeItemTemplate}" CacheMode="BitmapCache">
+                    <!--<toolkit:ListPickerItem Tap="GagTaped" Content="9gag"></toolkit:ListPickerItem>-->
+                    <!--<toolkit:ListPickerItem Tap="JokesTaped" Content="Jokes"></toolkit:ListPickerItem>-->
+                </toolkit:ListPicker> <Button Height="100" Name="btnGo" Content="Show me the fun" Click="btnGo_Click"></Button>
+
+            </StackPanel>
         </Grid>
     </Grid>
  
