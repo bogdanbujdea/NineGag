@@ -133,8 +133,9 @@ namespace NineGag
                 try
                 {
                     Page.CurrentImageId--;
-                    if (Page.CurrentImageId == -1)
+                    if (Page.CurrentImageId <= -1)
                     {
+                        Page.CurrentImageId = 0;
                         if(!Connected())
                             throw new ArgumentException();
                         if(Page.Type != PageType.Hot && Page.Type != PageType.Trending)

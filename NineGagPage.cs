@@ -230,7 +230,8 @@ namespace NineGag
         {
             DateTime dateTime = DateTime.Now;
             int millisecond = dateTime.Millisecond;
-            Link += "?=" + millisecond.ToString();
+            string tmp = Link;
+            tmp += "?=" + millisecond.ToString();
             HtmlWeb.LoadAsync(Link, (sender, doc) =>
                                         {
                                             _document = doc.Document ?? null;
