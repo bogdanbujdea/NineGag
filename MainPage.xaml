@@ -56,26 +56,34 @@
         </DataTemplate>
     </phone:PhoneApplicationPage.Resources>
     <!--LayoutRoot is the root grid where all page content is placed-->
-    <Grid x:Name="LayoutRoot" Background="Transparent">
+    <Grid x:Name="LayoutRoot" >
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
+        <Grid.Background>
+            <ImageBrush ImageSource="/NineGag;component/BackgroundImage.png" Stretch="UniformToFill"></ImageBrush>
+        </Grid.Background>
+        
         <!--TitlePanel contains the name of the application and page title-->
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock x:Name="ApplicationTitle" Text="9Gag" Style="{StaticResource PhoneTextNormalStyle}"/>
-            <TextBlock x:Name="PageTitle" Text="Fun Type" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+            <TextBlock x:Name="ApplicationTitle" Text="9Gag" Style="{StaticResource PhoneTextNormalStyle}" Foreground="#FF0B35B8"/>
+            <TextBlock x:Name="PageTitle" Text="Fun Type" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}" Foreground="#FF1343D8"/>
         </StackPanel>
-
+        
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
             <StackPanel>
-                <TextBlock Name="txtFunText" FontSize="25" FontFamily="Lucida Sans Unicode" Text="Choose your fun:" ></TextBlock>
-                <toolkit:ListPicker  Background="Beige" Height="Auto" x:Name="FunMenu" Width="Auto" SelectionChanged="FunTypeChanged" ItemTemplate="{StaticResource PickerFunTemplate}"  FullModeItemTemplate="{StaticResource PickerFullModeItemTemplate}" CacheMode="BitmapCache">
+                <toolkit:ListPicker BorderThickness="3" BorderBrush="Black" Background="White" Height="Auto" x:Name="FunMenu" SelectionChanged="FunTypeChanged" ItemTemplate="{StaticResource PickerFunTemplate}"  FullModeItemTemplate="{StaticResource PickerFullModeItemTemplate}" CacheMode="BitmapCache" Margin="12" Foreground="{x:Null}">
                     <!--<toolkit:ListPickerItem Tap="GagTaped" Content="9gag"></toolkit:ListPickerItem>-->
                     <!--<toolkit:ListPickerItem Tap="JokesTaped" Content="Jokes"></toolkit:ListPickerItem>-->
-                </toolkit:ListPicker> <Button Height="100" Name="btnGo" Content="Show me the fun" Click="BtnGoClick"></Button>
+                </toolkit:ListPicker> <Button Height="100" Name="btnGo" Content="Show me the fun" Click="BtnGoClick" Opacity="0.97" BorderThickness="1" FontSize="48" FontFamily="/NineGag;component/Fonts/Fonts.zip#Monotype Corsiva" FontWeight="Bold" Foreground="#FF1343D8">
+ 	<Button.Background>
+ 		<LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+ 			<GradientStop Color="#FF505158" Offset="0"/>
+ 			<GradientStop Color="#FF161413" Offset="1"/>
+ 		</LinearGradientBrush>
+ 	</Button.Background></Button>
 
             </StackPanel>
         </Grid>

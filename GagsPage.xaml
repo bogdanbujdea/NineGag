@@ -31,7 +31,14 @@
                 <Border Name="GagTextBorder" Visibility="Collapsed" VerticalAlignment="Top" Height="70" Background="White">
                     <TextBlock TextWrapping="Wrap" Visibility="Collapsed" Foreground="Black" Name="GagText" Text="Loading..." FontFamily="Comic Sans MS" VerticalAlignment="Top" FontSize="25" Height="70"></TextBlock>
                 </Border>
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="40" FontFamily="Comic Sans MS" Height="50" Name="txtLoading" Text="Loading..." />
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="40" FontFamily="Comic Sans MS" Height="50" Name="txtLoading" Text="Loading..." >
+                	<TextBlock.Foreground>
+                		<LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                			<GradientStop Color="Gray" Offset="1"/>
+                			<GradientStop Color="Red"/>
+                		</LinearGradientBrush>
+                	</TextBlock.Foreground>
+                </TextBlock>
                 <Line Height="5" Fill="Blue"></Line>
                 <Border Width="450" Height="687" CornerRadius="0">
                     <Image ImageOpened="GagImageOpened" Name="GagImage" HorizontalAlignment="Center"  VerticalAlignment="Center" Stretch="Uniform">
