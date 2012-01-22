@@ -53,8 +53,7 @@ namespace NineGag
             {
                 if (_gags.Count <= CurrentImageId || CurrentImageId < 0)
                 {
-                    throw new IndexOutOfRangeException("Gag Image with index " + CurrentImageId.ToString() +
-                                                       " does not exist");
+                    CurrentImageId = 0;
                 }
                 return _gags[CurrentImageId];
             }
@@ -341,4 +340,5 @@ namespace NineGag
             return words.FirstOrDefault(word => Int32.TryParse(word, out i));
         }
     }
+
 }
