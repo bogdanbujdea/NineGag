@@ -318,7 +318,9 @@ namespace NineGag
                             catch
                             {
                                 firstPage = true;
-                                Link = "http://9gag.com";
+                                Link = "http://9gag.com" + FirstPageId;
+                                Id = GetIdFromLink(Link);
+                                Load();
                                 FirstPageId = "/hot/0";
                             }
                         }
@@ -327,8 +329,9 @@ namespace NineGag
             }
             catch
             {
-                Link = "http://9gag.com";
-                FirstPageId = "/hot/0";
+                Link = "http://9gag.com" + FirstPageId;
+                Id = GetIdFromLink(Link);
+                Load();
             }
         }
         

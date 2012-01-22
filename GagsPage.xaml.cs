@@ -1,15 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Phone.Controls;
+using Microsoft.Xna.Framework.Media;
 
 namespace NineGag
 {
-    public partial class GagsPage : PhoneApplicationPage
+    public partial class GagsPage
     {
         #region BackgroundWork enum
 
@@ -22,18 +24,26 @@ namespace NineGag
 
         #endregion
 
-        private const double MAX_IMAGE_ZOOM = 5;
+        private const double MaxImageZoom = 5;
 
-        private readonly NineGagPage Page;
         private readonly BackgroundWorker _backgroundWorker;
-        private Point ImagePosition = new Point(0, 0);
-        private double TotalImageScale = 1d;
+        private Point _imagePosition = new Point(0, 0);
+        private double _totalImageScale = 1d;
 
 
         private Point _oldFinger1;
         private Point _oldFinger2;
         private double _oldScaleFactor;
         private BackgroundWork _work;
+
+        private NineGagPage _nineGagPage;
+// ReSharper disable ConvertToAutoProperty
+        public NineGagPage Page
+// ReSharper restore ConvertToAutoProperty
+        {
+            get { return _nineGagPage; }
+            set { _nineGagPage = value; }
+        }
 
         public GagsPage()
         {
@@ -55,6 +65,7 @@ namespace NineGag
         {
             try
             {
+                btnOPtions.Visibility = Visibility.Visible;
                 txtLoading.Visibility = Visibility.Collapsed;
                 GagTextBorder.Visibility = Visibility.Visible;
                 GagText.Visibility = Visibility.Visible;
@@ -65,6 +76,7 @@ namespace NineGag
                 else Page.CurrentImageId = Page.GagCount - 1; //else, we load the last gag
                 //Load the image in the control
                 GagImage.Source = Page.GagItem.Image;
+                GagText.Text = Page.GagItem.TextDescription;
             }
             catch (Exception exception)
             {
@@ -87,13 +99,15 @@ namespace NineGag
                                                                                              UriKind.RelativeOrAbsolute)));
             }
             Deployment.Current.Dispatcher.BeginInvoke(() => GagText.Visibility = Visibility.Collapsed);
-
+            Deployment.Current.Dispatcher.BeginInvoke(() => btnOPtions.Visibility = Visibility.Collapsed);
             string text = "Loading";
             const string dot = ".";
             int count = 0;
             while (Page.IsLoaded == false)
             {
+// ReSharper disable AccessToModifiedClosure
                 Deployment.Current.Dispatcher.BeginInvoke(() => txtLoading.Text = text);
+// ReSharper restore AccessToModifiedClosure
 
                 Thread.Sleep(300);
                 if (count < 3)
@@ -120,8 +134,9 @@ namespace NineGag
                 GagImage.Stretch = Page.GagItem.StretchMode;
                 GagText.Text = Page.GagItem.TextDescription;
             }
-            catch
+            catch (Exception)
             {
+                MessageBox.Show("Can't load a new image. Please try again!");
             }
         }
 
@@ -161,7 +176,7 @@ namespace NineGag
                                 }
                                 Page.FirstPageId = "1";
                                 Page.Link = "http://9gag.com/top/" + type + "/1";
-
+                                Page.Id = "1";
                                 _work = BackgroundWork.LoadPage;
                                 _backgroundWorker.RunWorkerAsync();
                                 Page.Load();
@@ -169,7 +184,9 @@ namespace NineGag
                         }
 
 
+// ReSharper disable PossibleNullReferenceException
                     Page.PreviousPage = "FirstPage";
+// ReSharper restore PossibleNullReferenceException
                     Page.CurrentImageId = 0;
                     try
                     {
@@ -195,13 +212,71 @@ namespace NineGag
 
         private void GagImageOpened(object sender, RoutedEventArgs e)
         {
+        }
+
+        private void ShowOptions(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult messageBoxResult = MessageBox.Show("Save this image?", "Save", MessageBoxButton.OKCancel);
+            if (messageBoxResult == MessageBoxResult.OK)
+            {
+                txtFileName.Visibility = Visibility.Visible;
+                txtSave.Visibility = Visibility.Visible;
+                btnCancel.Visibility = Visibility.Visible;
+                btnSave.Visibility = Visibility.Visible;
+                txtFileName.Text = Page.GagItem.Id;
+                GagImage.Visibility = Visibility.Collapsed;
+                GagText.Visibility = Visibility.Collapsed;
+                GagTextBorder.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void SaveImage(string fileName)
+        {
             try
             {
-                LoadImage();
+                using (var library = new MediaLibrary())
+                {
+                    var bitmap = new WriteableBitmap(Page.GagItem.Image.PixelWidth, Page.GagItem.Image.PixelHeight);
+                    var ms = new MemoryStream();
+                    bitmap.SaveJpeg(ms, bitmap.PixelWidth, bitmap.PixelHeight, 0, 100);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    fileName += ".jpg";
+                    library.SavePicture(fileName, ms);
+                    MessageBox.Show("The picture was saved to your media library!");
+                }
             }
-            catch
+            catch (Exception exception)
             {
+                MessageBox.Show("Unable to save photo. Please try again!" + exception.Message);
             }
+            finally
+            {
+                txtFileName.Visibility = Visibility.Collapsed;
+                txtSave.Visibility = Visibility.Collapsed;
+                btnCancel.Visibility = Visibility.Collapsed;
+                btnSave.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void BtnSaveClick(object sender, RoutedEventArgs e)
+        {
+            string name = txtFileName.Text;
+            SaveImage(name);
+
+            GagImage.Visibility = Visibility.Visible;
+            GagText.Visibility = Visibility.Visible;
+            GagTextBorder.Visibility = Visibility.Visible;
+        }
+
+        private void BtnCancelClick(object sender, RoutedEventArgs e)
+        {
+            txtFileName.Visibility = Visibility.Collapsed;
+            txtSave.Visibility = Visibility.Collapsed;
+            btnCancel.Visibility = Visibility.Collapsed;
+            btnSave.Visibility = Visibility.Collapsed;
+            GagImage.Visibility = Visibility.Visible;
+            GagText.Visibility = Visibility.Visible;
+            GagTextBorder.Visibility = Visibility.Visible;
         }
 
         #region Utils
@@ -236,7 +311,7 @@ namespace NineGag
         /// </summary>
         private void UpdateImageScale(double scaleFactor)
         {
-            TotalImageScale *= scaleFactor;
+            _totalImageScale *= scaleFactor;
             ApplyScale();
         }
 
@@ -245,8 +320,8 @@ namespace NineGag
         /// </summary>
         private void ApplyScale()
         {
-            ((CompositeTransform) GagImage.RenderTransform).ScaleX = TotalImageScale;
-            ((CompositeTransform) GagImage.RenderTransform).ScaleY = TotalImageScale;
+            ((CompositeTransform) GagImage.RenderTransform).ScaleX = _totalImageScale;
+            ((CompositeTransform) GagImage.RenderTransform).ScaleY = _totalImageScale;
         }
 
         /// <summary>
@@ -255,18 +330,18 @@ namespace NineGag
         /// </summary>
         private void UpdateImagePosition(Point delta)
         {
-            var newPosition = new Point(ImagePosition.X + delta.X, ImagePosition.Y + delta.Y);
+            var newPosition = new Point(_imagePosition.X + delta.X, _imagePosition.Y + delta.Y);
 
             if (newPosition.X > 0) newPosition.X = 0;
             if (newPosition.Y > 0) newPosition.Y = 0;
 
-            if ((GagImage.ActualWidth*TotalImageScale) + newPosition.X < GagImage.ActualWidth)
-                newPosition.X = GagImage.ActualWidth - (GagImage.ActualWidth*TotalImageScale);
+            if ((GagImage.ActualWidth*_totalImageScale) + newPosition.X < GagImage.ActualWidth)
+                newPosition.X = GagImage.ActualWidth - (GagImage.ActualWidth*_totalImageScale);
 
-            if ((GagImage.ActualHeight*TotalImageScale) + newPosition.Y < GagImage.ActualHeight)
-                newPosition.Y = GagImage.ActualHeight - (GagImage.ActualHeight*TotalImageScale);
+            if ((GagImage.ActualHeight*_totalImageScale) + newPosition.Y < GagImage.ActualHeight)
+                newPosition.Y = GagImage.ActualHeight - (GagImage.ActualHeight*_totalImageScale);
 
-            ImagePosition = newPosition;
+            _imagePosition = newPosition;
 
             ApplyPosition();
         }
@@ -276,8 +351,8 @@ namespace NineGag
         /// </summary>
         private void ApplyPosition()
         {
-            ((CompositeTransform) GagImage.RenderTransform).TranslateX = ImagePosition.X;
-            ((CompositeTransform) GagImage.RenderTransform).TranslateY = ImagePosition.Y;
+            ((CompositeTransform) GagImage.RenderTransform).TranslateX = _imagePosition.X;
+            ((CompositeTransform) GagImage.RenderTransform).TranslateY = _imagePosition.Y;
         }
 
         /// <summary>
@@ -285,8 +360,8 @@ namespace NineGag
         /// </summary>
         private void ResetImagePosition()
         {
-            TotalImageScale = 1;
-            ImagePosition = new Point(0, 0);
+            _totalImageScale = 1;
+            _imagePosition = new Point(0, 0);
             ApplyScale();
             ApplyPosition();
         }
@@ -296,14 +371,14 @@ namespace NineGag
         /// </summary>
         private bool IsDragValid(double scaleDelta, Point translateDelta)
         {
-            if (ImagePosition.X + translateDelta.X > 0 || ImagePosition.Y + translateDelta.Y > 0)
+            if (_imagePosition.X + translateDelta.X > 0 || _imagePosition.Y + translateDelta.Y > 0)
                 return false;
 
-            if ((GagImage.ActualWidth*TotalImageScale*scaleDelta) + (ImagePosition.X + translateDelta.X) <
+            if ((GagImage.ActualWidth*_totalImageScale*scaleDelta) + (_imagePosition.X + translateDelta.X) <
                 GagImage.ActualWidth)
                 return false;
 
-            if ((GagImage.ActualHeight*TotalImageScale*scaleDelta) + (ImagePosition.Y + translateDelta.Y) <
+            if ((GagImage.ActualHeight*_totalImageScale*scaleDelta) + (_imagePosition.Y + translateDelta.Y) <
                 GagImage.ActualHeight)
                 return false;
 
@@ -315,7 +390,7 @@ namespace NineGag
         /// </summary>
         private bool IsScaleValid(double scaleDelta)
         {
-            return (TotalImageScale*scaleDelta >= 1) && (TotalImageScale*scaleDelta <= MAX_IMAGE_ZOOM);
+            return (_totalImageScale*scaleDelta >= 1) && (_totalImageScale*scaleDelta <= MaxImageZoom);
         }
 
         #endregion
@@ -349,7 +424,7 @@ namespace NineGag
                 currentFinger2,
                 _oldFinger1,
                 _oldFinger2,
-                ImagePosition,
+                _imagePosition,
                 scaleFactor);
 
             _oldFinger1 = currentFinger1;
@@ -400,14 +475,34 @@ namespace NineGag
                             throw new ArgumentException();
                         if (Page.Type != PageType.Hot && Page.Type != PageType.Trending)
                         {
-                            string tmp = Page.FirstPageId;
                             int id;
                             Int32.TryParse(Page.GetIdFromLink(Page.Link), out id);
-                            if (id == 1)
+                            id--;
+                            if (id == 0)
                             {
                                 ReachedFirstPage();
                                 return;
                             }
+                            string topType = "day";
+                            if (Page.Type == PageType.TopDay)
+                                topType = "day";
+                            else if (Page.Type == PageType.TopAll)
+                                topType = "all";
+                            else if (Page.Type == PageType.TopMonth)
+                                topType = "month";
+                            else if (Page.Type == PageType.TopWeek)
+                                topType = "week";
+                            Page.Link = "http://9gag.com/top/" + topType + "/" + id.ToString();
+                            Page.Id = id.ToString();
+                            _work = BackgroundWork.LoadPreviousPage;
+                            Page.IsLoaded = false;
+                            txtLoading.Visibility = Visibility.Visible;
+                            GagTextBorder.Visibility = Visibility.Collapsed;
+                            GagText.Visibility = Visibility.Collapsed;
+                            GagImage.Source = null;
+                            Page.Load();
+                            _backgroundWorker.RunWorkerAsync();
+                            return;
                         }
                         string link = Page.Id;
                         int i;
@@ -476,15 +571,37 @@ namespace NineGag
                         {
                             i--;
                             Page.Id = i.ToString();
-                            string caps = Page.Type.ToString();
-                            caps = caps.ToLower();
-                            Page.Link = "http://9gag.com/" + caps + "/" + Page.Id;
+                            if (Page.Type != PageType.Hot && Page.Type != PageType.Trending)
+                            {
+                                int id;
+                                Int32.TryParse(Page.GetIdFromLink(Page.Link), out id);
+                                id++;
+                                string topType = "day";
+                                if(Page.Type == PageType.TopDay)
+                                    topType = "day";
+                                else if(Page.Type==PageType.TopAll)
+                                    topType = "all";
+                                else if(Page.Type==PageType.TopMonth)
+                                    topType = "month";
+                                else if(Page.Type==PageType.TopWeek)
+                                    topType = "week";
+                                Page.Link = "http://9gag.com/top/" + topType + "/" + id.ToString();
+                                Page.Id = id.ToString();
+                            }
+                            else
+                            {
+                                string caps = Page.Type.ToString();
+                                caps = caps.ToLower();
+                                Page.Link = "http://9gag.com/" + caps + "/" + Page.Id;
+                            }
+                            
                             _work = BackgroundWork.LoadNextPage;
                             Page.IsLoaded = false;
                             txtLoading.Visibility = Visibility.Visible;
                             GagTextBorder.Visibility = Visibility.Collapsed;
                             GagText.Visibility = Visibility.Collapsed;
                             GagImage.Source = null;
+                            Page.IsLoaded = false;
                             Page.Load();
                             _backgroundWorker.RunWorkerAsync();
                         }

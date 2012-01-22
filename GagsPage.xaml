@@ -26,11 +26,29 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
+           
             <StackPanel>
-
+                <TextBlock FontSize="25" Name="txtSave" Visibility="Collapsed" Text="Enter a name" ></TextBlock>
+                <TextBox Name="txtFileName" Visibility="Collapsed"></TextBox>
+            </StackPanel>
+            <Button Click="BtnSaveClick" Margin="0, 90, 0, 0" Width="150" Content="Ok" VerticalAlignment="Top" Height="70" HorizontalAlignment="Left" Name="btnSave" Visibility="Collapsed"></Button>
+            <Button Click="BtnCancelClick" Margin="0, 90, 0, 0" Width="150" Content="Cancel" VerticalAlignment="Top" Height="70"  Name="btnCancel" HorizontalAlignment="Right" Visibility="Collapsed"></Button>
+           
+            <StackPanel>
                 <Border Name="GagTextBorder" Visibility="Collapsed" VerticalAlignment="Top" Height="70" Background="White">
                     <TextBlock TextWrapping="Wrap" Visibility="Collapsed" Foreground="Black" Name="GagText" Text="Loading..." FontFamily="Comic Sans MS" VerticalAlignment="Top" FontSize="25" Height="70"></TextBlock>
                 </Border>
+                <Border Width="450" Height="687" CornerRadius="0">
+                    <Image ImageOpened="GagImageOpened" Name="GagImage" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
+                        <toolkit:GestureService.GestureListener>
+                            <toolkit:GestureListener PinchStarted="OnPinchStarted" PinchDelta="OnPinchDelta" DragDelta="OnDragDelta" DoubleTap="DoubleTap" />
+                        </toolkit:GestureService.GestureListener>
+                        <Image.RenderTransform>
+                            <CompositeTransform ScaleX="1" ScaleY="1" TranslateX="0" TranslateY="0" />
+                        </Image.RenderTransform>
+                    </Image>
+                </Border>
+                
                 <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="40" FontFamily="Comic Sans MS" Height="50" Name="txtLoading" Text="Loading..." >
                 	<TextBlock.Foreground>
                 		<LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
@@ -40,28 +58,12 @@
                 	</TextBlock.Foreground>
                 </TextBlock>
                 <Line Height="5" Fill="Blue"></Line>
-                <Border Width="450" Height="687" CornerRadius="0">
-                    <Image ImageOpened="GagImageOpened" Name="GagImage" HorizontalAlignment="Center"  VerticalAlignment="Center" Stretch="Uniform">
-                        <toolkit:GestureService.GestureListener>
-                            <toolkit:GestureListener
-                                PinchStarted="OnPinchStarted"
-                                PinchDelta="OnPinchDelta"
-                                DragDelta="OnDragDelta"
-                               DoubleTap="DoubleTap"/>
-                        </toolkit:GestureService.GestureListener>
-                        <Image.RenderTransform>
-                            <CompositeTransform
-                        ScaleX="1" ScaleY="1"
-                        TranslateX="0" TranslateY="0"/>
-                        </Image.RenderTransform>
-                    </Image>
-                </Border>
             </StackPanel>
-                <!--<Button Visibility="Collapsed"  Background="Black" Height="86" HorizontalAlignment="Left" Margin="367,640,0,0" Name="btnOPtions" VerticalAlignment="Top" Width="83" BorderThickness="0" Padding="0" HorizontalContentAlignment="Center" BorderBrush="Black">
+                <Button Click="ShowOptions" Visibility="Collapsed"  Background="Black" Height="86" HorizontalAlignment="Left" Margin="367,640,0,0" Name="btnOPtions" VerticalAlignment="Top" Width="83" BorderThickness="0" Padding="0" HorizontalContentAlignment="Center" BorderBrush="Black">
                 <Button.Content>
-                    <Image Source="/NineGag;component/images/options.png" Stretch="UniformToFill" Height="64" Width="61" ImageFailed="Image_ImageFailed" />
+                    <Image Source="options.png" Stretch="UniformToFill" Height="64" Width="61"/>
                 </Button.Content>
-            </Button>-->
+            </Button>
         </Grid>
     </Grid>
  
