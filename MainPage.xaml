@@ -11,7 +11,7 @@
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    shell:SystemTray.IsVisible="True" xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit" BackKeyPress="PhoneApplicationPage_BackKeyPress">
+    shell:SystemTray.IsVisible="True" xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit" BackKeyPress="PhoneApplicationPageBackKeyPress">
     <phone:PhoneApplicationPage.Resources>
         <Style x:Key="TbStyle" TargetType="TextBlock">
             <Setter Property="Foreground">
@@ -51,7 +51,7 @@
         </DataTemplate>
         <DataTemplate x:Name="PickerFullModeItemTemplate">
             <StackPanel Orientation="Horizontal" Margin="16 21 0 20">
-                <TextBlock Text="{Binding Name}" Margin="16 0 0 0" FontSize="43" FontFamily="{StaticResource PhoneFontFamilyLight}"/>
+                <TextBlock FontFamily="Comic Sans MS" FontSize="40" Text="{Binding Name}" Margin="16 0 0 0"/>
             </StackPanel>
         </DataTemplate>
     </phone:PhoneApplicationPage.Resources>
@@ -75,7 +75,7 @@
                 <toolkit:ListPicker  Background="Beige" Height="Auto" x:Name="FunMenu" Width="Auto" SelectionChanged="FunTypeChanged" ItemTemplate="{StaticResource PickerFunTemplate}"  FullModeItemTemplate="{StaticResource PickerFullModeItemTemplate}" CacheMode="BitmapCache">
                     <!--<toolkit:ListPickerItem Tap="GagTaped" Content="9gag"></toolkit:ListPickerItem>-->
                     <!--<toolkit:ListPickerItem Tap="JokesTaped" Content="Jokes"></toolkit:ListPickerItem>-->
-                </toolkit:ListPicker> <Button Height="100" Name="btnGo" Content="Show me the fun" Click="btnGo_Click"></Button>
+                </toolkit:ListPicker> <Button Height="100" Name="btnGo" Content="Show me the fun" Click="BtnGoClick"></Button>
 
             </StackPanel>
         </Grid>

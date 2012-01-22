@@ -91,14 +91,13 @@ namespace NineGag
 
       
 
-        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
+        private void PhoneApplicationPageBackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
 
         }
 
-        private void btnGo_Click(object sender, RoutedEventArgs e)
+        private void BtnGoClick(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Type is " + top);
             if (NavigationService.Navigate(new Uri("/GagsPage.xaml?Type=" + top, UriKind.RelativeOrAbsolute)) != true)
                 MessageBox.Show("Can't change page");
         }
