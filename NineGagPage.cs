@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Net;
-using System.Threading;
+using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using HtmlAgilityPack;
-using System.Net.NetworkInformation;
 
 namespace NineGag
 {
@@ -39,28 +37,6 @@ namespace NineGag
         //private properties
         private readonly List<GagItem> _gags;
         private HtmlDocument _document;
-        
-        //public string properties
-        public string Link { get; set; }
-        public string PreviousPage { get; set; }
-        public string NextPage { get; set; }
-        public string Id { get; set; }
-        public string FirstPageId { get; set; }
-        
-        public GagItem GagItem
-        {
-            get
-            {
-                if (_gags.Count <= CurrentImageId || CurrentImageId < 0)
-                {
-                    CurrentImageId = 0;
-                }
-                return _gags[CurrentImageId];
-            }
-            set { _gags[CurrentImageId] = value; }
-        }
-
-        public PageType Type { get; set; }
 
         public NineGagPage(List<GagItem> gags)
         {
@@ -76,13 +52,35 @@ namespace NineGag
             IsLoaded = false;
         }
 
+        //public string properties
+        public string Link { get; set; }
+        public string PreviousPage { get; set; }
+        public string NextPage { get; set; }
+        public string Id { get; set; }
+        public string FirstPageId { get; set; }
+
+        public GagItem GagItem
+        {
+            get
+            {
+                if (_gags.Count <= CurrentImageId || CurrentImageId < 0)
+                {
+                    CurrentImageId = 0;
+                }
+                return _gags[CurrentImageId];
+            }
+            set { _gags[CurrentImageId] = value; }
+        }
+
+        public PageType Type { get; set; }
+
         //public int properties
         public int GagCount { get; set; }
 
         public int CurrentImageId { get; set; }
 
         public bool IsLoaded { get; set; }
-        
+
         //public methods
         public void Restart()
         {
@@ -137,6 +135,8 @@ namespace NineGag
                             }
                             i++;
                         }
+                    if (i != 99 || gagItem.Type == GagType.YouTube)
+                        continue;
                     if (gagItem.Type != GagType.YouTube) //if the GagItem it's an image
                     {
                         string[] imageLink = node.Descendants("img").Select(
@@ -228,12 +228,13 @@ namespace NineGag
         public void Load()
         {
             DateTime dateTime = DateTime.Now;
+            _document = null;
             int millisecond = dateTime.Millisecond;
             string tmp = Link;
             tmp += "?=" + millisecond.ToString();
-            HtmlWeb.LoadAsync(Link, (sender, doc) =>
+            HtmlWeb.LoadAsync(tmp, (sender, doc) =>
                                         {
-                                            _document = doc.Document ?? null;
+                                            _document = doc.Document;
                                             IsLoaded = true;
                                         }
                 );
@@ -251,7 +252,7 @@ namespace NineGag
 
         public async void GetFirstPage(PageType type)
         {
-            var firstPage = false;
+            bool firstPage = false;
             if (!Connected())
                 return;
             try
@@ -266,8 +267,8 @@ namespace NineGag
                         pageType = "trending";
                         break;
                 }
-                
-                if(pageType.Any())
+
+                if (pageType.Any())
                 {
                     string link = "http://9gag.com/" + pageType;
                     string result =
@@ -287,7 +288,9 @@ namespace NineGag
                             link = GetIdFromLink(link);
                             int pageId;
                             if (int.TryParse(link, out pageId) == false)
+// ReSharper disable RedundantAssignment
                                 link = "0";
+// ReSharper restore RedundantAssignment
                             pageId++;
                             link = "http://9gag.com/" + pageType + "/";
                             link += pageId.ToString();
@@ -308,7 +311,9 @@ namespace NineGag
                                 }
                                 else
                                 {
+// ReSharper disable RedundantAssignment
                                     firstPage = true;
+// ReSharper restore RedundantAssignment
                                     Link = "http://9gag.com" + FirstPageId;
                                     Id = GetIdFromLink(Link);
                                     Load();
@@ -334,7 +339,7 @@ namespace NineGag
                 Load();
             }
         }
-        
+
         //private methods
         public string GetIdFromLink(string link)
         {
@@ -343,5 +348,4 @@ namespace NineGag
             return words.FirstOrDefault(word => Int32.TryParse(word, out i));
         }
     }
-
 }

@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 
 namespace NineGag
 {
-    public partial class MainPage : PhoneApplicationPage
+    public partial class MainPage
     {
-        private string top;
+        private string _top;
 
         // Constructor
         public MainPage()
@@ -23,14 +16,14 @@ namespace NineGag
             InitializeComponent();
             var items = new List<FunType>
                             {
-                                new FunType() {Name = "Hot Page"},
-                                new FunType() {Name = "Trending Page"},
-                                new FunType() {Name = "Top 24"},
-                                new FunType() {Name = "Top Week"},
-                                new FunType() {Name = "Top Month"},
-                                new FunType() {Name = "Top All"}
+                                new FunType {Name = "Hot Page"},
+                                new FunType {Name = "Trending Page"},
+                                new FunType {Name = "Top 24"},
+                                new FunType {Name = "Top Week"},
+                                new FunType {Name = "Top Month"},
+                                new FunType {Name = "Top All"}
                             };
-            top = "hot";
+            _top = "hot";
             FunMenu.ItemsSource = items;
         }
 
@@ -56,22 +49,22 @@ namespace NineGag
                             switch (data.Name)
                             {
                                 case "Hot Page":
-                                    top = "hot";
+                                    _top = "hot";
                                     break;
                                 case "Trending Page":
-                                    top = "trending";
+                                    _top = "trending";
                                     break;
                                 case "Top 24":
-                                    top = "day";
+                                    _top = "day";
                                     break;
                                 case "Top Week":
-                                    top = "week";
+                                    _top = "week";
                                     break;
                                 case "Top Month":
-                                    top = "month";
+                                    _top = "month";
                                     break;
                                 case "Top All":
-                                    top = "all";
+                                    _top = "all";
                                     break;
                                 default:
                                     MessageBox.Show("Wrong Selection");
@@ -98,8 +91,14 @@ namespace NineGag
 
         private void BtnGoClick(object sender, RoutedEventArgs e)
         {
-            if (NavigationService.Navigate(new Uri("/GagsPage.xaml?Type=" + top, UriKind.RelativeOrAbsolute)) != true)
+            if (NavigationService.Navigate(new Uri("/GagsPage.xaml?Type=" + _top, UriKind.RelativeOrAbsolute)) != true)
                 MessageBox.Show("Can't change page");
+        }
+
+        private void BtnHelpClick(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(
+                "1. You have many ways to browse 9gag.\r\n2.Drag the image to the left or to the right in order to browse the site\r\n3.The app has pinch-to-zoom :)\r\n4.There is a small button in the bottom-right corner with a troll face icon, use it to save pictures from 9gag\r\n5.This is not an official 9gag app");
         }
 
        

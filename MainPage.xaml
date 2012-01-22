@@ -77,15 +77,24 @@
                 <toolkit:ListPicker BorderThickness="3" BorderBrush="Black" Background="White" Height="Auto" x:Name="FunMenu" SelectionChanged="FunTypeChanged" ItemTemplate="{StaticResource PickerFunTemplate}"  FullModeItemTemplate="{StaticResource PickerFullModeItemTemplate}" CacheMode="BitmapCache" Margin="12" Foreground="{x:Null}">
                     <!--<toolkit:ListPickerItem Tap="GagTaped" Content="9gag"></toolkit:ListPickerItem>-->
                     <!--<toolkit:ListPickerItem Tap="JokesTaped" Content="Jokes"></toolkit:ListPickerItem>-->
-                </toolkit:ListPicker> <Button Height="100" Name="btnGo" Content="Show me the fun" Click="BtnGoClick" Opacity="0.97" BorderThickness="1" FontSize="48" FontFamily="/NineGag;component/Fonts/Fonts.zip#Monotype Corsiva" FontWeight="Bold" Foreground="#FF1343D8">
- 	<Button.Background>
- 		<LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
- 			<GradientStop Color="#FF505158" Offset="0"/>
- 			<GradientStop Color="#FF161413" Offset="1"/>
- 		</LinearGradientBrush>
- 	</Button.Background></Button>
-
+                </toolkit:ListPicker> 
+                <Button Height="100" Name="btnGo" Content="Show me the fun" Click="BtnGoClick" Opacity="0.97" BorderThickness="1" FontSize="48" FontFamily="/NineGag;component/Fonts/Fonts.zip#Monotype Corsiva" FontWeight="Bold" Foreground="#FF1343D8">
+                    <Button.Background>
+                        <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                        <GradientStop Color="#FF505158" Offset="0" />
+                        <GradientStop Color="#FF161413" Offset="1" />
+                        </LinearGradientBrush>
+                    </Button.Background>
+                </Button>
             </StackPanel>
+            <Button Click="BtnHelpClick"  Name="btnHelp" VerticalAlignment="Bottom" Height="Auto" Width="150" Content="Help" Foreground="#FFE2E4E8" BorderBrush="#FFD7DBBF">
+                <Button.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="Black" Offset="0" />
+                        <GradientStop Color="#FF454141" Offset="1" />
+                    </LinearGradientBrush>
+                </Button.Background>
+            </Button>
         </Grid>
     </Grid>
  
