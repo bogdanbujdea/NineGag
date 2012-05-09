@@ -78,7 +78,6 @@ namespace NineGag
             catch
             {
                 MessageBox.Show("Can't change page. Please try again");
-                
             }
         }
 
